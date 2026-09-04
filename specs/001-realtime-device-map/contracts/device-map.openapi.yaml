@@ -54,7 +54,10 @@ paths:
             default: 5000
         - name: If-None-Match
           in: header
-          description: ETag from the latest successful snapshot for the identical normalized query.
+          description: >-
+            ETag from the latest successful snapshot for the identical normalized query. The
+            representation includes the computed online value, so a tag becomes stale when any
+            device crosses the 30-second offline threshold even without new telemetry.
           schema:
             type: string
       responses:
@@ -75,7 +78,10 @@ paths:
               schema:
                 $ref: '#/components/schemas/DeviceMapSnapshot'
         '304':
-          description: Representation has not changed for this query.
+          description: >-
+            Representation has not changed for this query. The server MUST NOT return 304 when a
+            device has crossed the 30-second offline threshold since the supplied ETag was issued;
+            it MUST return 200 with the updated online value and a new ETag.
         '400':
           description: Invalid bbox or filter.
           content:
@@ -87,7 +93,10 @@ paths:
         '403':
           description: Caller cannot view devices in the requested scope.
         '422':
-          description: Viewport contains more devices than the supported maximum.
+          description: >-
+            Viewport matches more than 5,000 devices. The server returns VIEWPORT_TOO_DENSE instead
+            of a device list and MUST NOT truncate silently; the client asks the operator to zoom in
+            or apply filters before retrying.
           content:
             application/problem+json:
               schema:
@@ -219,7 +228,10 @@ components:
           format: date-time
         online:
           type: boolean
-          description: True when generated_at minus last_seen_at is at most 30 seconds.
+          description: >-
+            Part of the cache representation. True when generated_at minus last_seen_at is at most
+            30 seconds. The server MUST issue a different ETag when this value changes solely because
+            the offline threshold elapsed, even if no new telemetry arrived.
         speed_kph:
           type: [number, 'null']
           minimum: 0

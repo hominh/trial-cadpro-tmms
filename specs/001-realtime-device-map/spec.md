@@ -1,6 +1,6 @@
 # Feature Specification: Bản đồ thiết bị realtime
 
-**Feature Branch**: Not created (no `before_specify` hook configured)
+**Feature Branch**: `001-realtime-device-map`
 
 **Created**: 2026-09-04
 
@@ -9,7 +9,7 @@
 **Input**: User description: "Hiển thị thiết bị cố định và di động trên bản đồ realtime, cập nhật
 mượt vị trí hợp lệ, thể hiện trạng thái, hỗ trợ tìm kiếm/lọc và chỉ tải dữ liệu trong viewport."
 
-## User Scenarios & Testing *(mandatory)*
+## User Scenarios & Testing _(mandatory)_
 
 ### User Story 1 - Quan sát trạng thái toàn mạng lưới (Priority: P1)
 
@@ -95,12 +95,14 @@ thời điểm ghi nhận gần nhất, cảnh báo, preset và thông tin chuy�
   vị trí hợp lệ mới bằng hành vi suy giảm an toàn.
 - Bộ lọc không có kết quả phải hiển thị trạng thái rỗng rõ ràng và không tự mở rộng ra ngoài viewport.
 
-## Requirements *(mandatory)*
+## Requirements _(mandatory)_
 
 ### Functional Requirements
 
 - **FR-001**: Hệ thống MUST hiển thị mọi thiết bị đủ điều kiện trong viewport hiện tại với vị trí,
-  trạng thái kết nối, thời điểm ghi nhận gần nhất, mức cảnh báo và preset active nếu có.
+  trạng thái kết nối, thời điểm ghi nhận gần nhất, mức cảnh báo và preset active nếu có. Khi viewport
+  khớp hơn 5.000 thiết bị, server MUST trả `422 VIEWPORT_TOO_DENSE` thay vì danh sách; client MUST yêu
+  cầu người dùng zoom in hoặc áp dụng bộ lọc trước khi tải lại và MUST NOT âm thầm truncate dữ liệu.
 - **FR-002**: Thiết bị cố định MUST sử dụng vị trí đăng ký của object và MUST NOT thay đổi marker theo
   tọa độ telemetry.
 - **FR-003**: Thiết bị di động MUST sử dụng vị trí trạng thái gần nhất được tạo từ một fix GPS hợp lệ.
@@ -119,7 +121,7 @@ thời điểm ghi nhận gần nhất, cảnh báo, preset và thông tin chuy�
 - **FR-010**: Marker MUST phân biệt được các nhóm `lpr_camera`, `bus_gps`, `env_multi`,
   `signal_ctrl` và MUST có fallback rõ ràng cho loại chưa được ánh xạ.
 - **FR-011**: Người vận hành MUST có thể lọc thiết bị theo loại và trạng thái online/offline, đồng
-  thời tìm theo mã thiết bị.
+  thời tìm theo `device.code` hoặc `device.name` bằng phép khớp một phần không phân biệt hoa thường.
 - **FR-012**: Dữ liệu định vị có `gps_status = 'V'` hoặc trạng thái tương đương MUST NOT thay đổi vị
   trí đang hiển thị.
 - **FR-013**: Khi viewport hoặc chu kỳ làm mới tạo yêu cầu thay thế, hệ thống MUST hủy công việc cũ
@@ -145,7 +147,7 @@ thời điểm ghi nhận gần nhất, cảnh báo, preset và thông tin chuy�
 - Chỉnh sửa object/device, cấu hình preset hoặc xử lý cảnh báo từ panel bản đồ.
 - Điều phối lệnh xuống thiết bị và tối ưu tuyến xe.
 
-### Constitution Constraints *(mandatory)*
+### Constitution Constraints _(mandatory)_
 
 - **Owning Feature**: Feature `realtime-device-map` chịu trách nhiệm trải nghiệm bản đồ; mã nguồn
   tương lai thuộc `src/features/realtime-device-map/`.
@@ -170,7 +172,7 @@ thời điểm ghi nhận gần nhất, cảnh báo, preset và thông tin chuy�
 - **Viewport**: Biên không gian đang nhìn thấy cùng mức zoom; xác định tập thiết bị được phép tải.
 - **Map Selection**: Thiết bị đang được chọn và ngữ cảnh mở panel, độc lập với snapshot polling.
 
-## Success Criteria *(mandatory)*
+## Success Criteria _(mandatory)_
 
 ### Measurable Outcomes
 
@@ -183,11 +185,15 @@ thời điểm ghi nhận gần nhất, cảnh báo, preset và thông tin chuy�
 - **SC-004**: 100% fix GPS void trong bộ kiểm thử không làm thay đổi marker; phản hồi cũ không bao
   giờ ghi đè một vị trí mới hơn.
 - **SC-005**: Ít nhất 95% cập nhật hợp lệ của thiết bị di động bắt đầu được thể hiện trong một chu kỳ
-  làm mới và không có bước nhảy trực quan lớn khi dữ liệu hướng/tốc độ hợp lệ.
+  làm mới. Với mỗi cặp fix hợp lệ liên tiếp của marker mobile, non-static, vị trí MUST được nội suy
+  tuyến tính (`linear`) trong đúng khoảng thời gian trôi qua giữa hai fix. Marker chỉ được snap tức
+  thời tới đích khi tốc độ suy ra từ khoảng cách giữa hai điểm lớn hơn 120 km/h hoặc khoảng thời gian
+  giữa hai fix hợp lệ lớn hơn tám giây (hai lần chu kỳ poll mặc định).
 - **SC-006**: Thay đổi online/offline được phản ánh trong một chu kỳ làm mới sau khi chính sách
   offline được thỏa mãn.
-- **SC-007**: Người vận hành có thể tìm một thiết bị theo mã, mở chi tiết và xác định trạng thái hiện
-  tại trong không quá mười giây ở ít nhất 90% lượt thử nghiệm nghiệp vụ.
+- **SC-007**: Trong Playwright E2E trên bộ dữ liệu mẫu 5.000 thiết bị, p95 thời gian từ khi nhập ký tự
+  tìm kiếm đầu tiên đến khi panel chi tiết của thiết bị được chọn hiển thị đầy đủ MUST không quá mười
+  giây.
 - **SC-008**: Mọi yêu cầu dữ liệu phát sinh từ bản đồ đều có giới hạn không gian; không có yêu cầu
   tải toàn bộ thiết bị trong kiểm thử nghiệm thu.
 
