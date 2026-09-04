@@ -1,0 +1,304 @@
+openapi: 3.1.0
+info:
+  title: CadPro TMMS Device Map API
+  version: 1.0.0
+  description: Viewport-bounded complete snapshots for the realtime device map.
+paths:
+  /api/v1/map/device-states:
+    get:
+      operationId: getViewportDeviceStates
+      summary: Get a complete device-state snapshot for the current viewport
+      parameters:
+        - name: bbox
+          in: query
+          required: true
+          description: CRS84 bounds in minLon,minLat,maxLon,maxLat order, inclusive at the edges.
+          schema:
+            type: array
+            minItems: 4
+            maxItems: 4
+            items:
+              type: number
+            examples:
+              - [106.60, 10.70, 106.90, 10.95]
+          style: form
+          explode: false
+        - name: device_types
+          in: query
+          schema:
+            type: array
+            maxItems: 50
+            items:
+              type: string
+          style: form
+          explode: false
+        - name: status
+          in: query
+          schema:
+            type: string
+            enum: [all, online, offline]
+            default: all
+        - name: q
+          in: query
+          description: Case-insensitive device code or name search.
+          schema:
+            type: string
+            minLength: 1
+            maxLength: 100
+        - name: limit
+          in: query
+          schema:
+            type: integer
+            minimum: 1
+            maximum: 5000
+            default: 5000
+        - name: If-None-Match
+          in: header
+          description: ETag from the latest successful snapshot for the identical normalized query.
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Complete atomic snapshot for the normalized query.
+          headers:
+            ETag:
+              required: true
+              schema:
+                type: string
+            Cache-Control:
+              required: true
+              schema:
+                type: string
+                const: private, no-cache
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/DeviceMapSnapshot'
+        '304':
+          description: Representation has not changed for this query.
+        '400':
+          description: Invalid bbox or filter.
+          content:
+            application/problem+json:
+              schema:
+                $ref: '#/components/schemas/Problem'
+        '401':
+          description: Authentication is required.
+        '403':
+          description: Caller cannot view devices in the requested scope.
+        '422':
+          description: Viewport contains more devices than the supported maximum.
+          content:
+            application/problem+json:
+              schema:
+                $ref: '#/components/schemas/ViewportTooDenseProblem'
+        '429':
+          description: Polling rate exceeded.
+          headers:
+            Retry-After:
+              schema:
+                type: integer
+                minimum: 1
+components:
+  schemas:
+    DeviceMapSnapshot:
+      type: object
+      additionalProperties: false
+      required:
+        - snapshot_id
+        - generated_at
+        - query
+        - offline_threshold_seconds
+        - returned
+        - unlocated_count
+        - complete
+        - poll_after_ms
+        - items
+      properties:
+        snapshot_id:
+          type: string
+          minLength: 1
+          description: Opaque query-specific snapshot token.
+        generated_at:
+          type: string
+          format: date-time
+        query:
+          $ref: '#/components/schemas/NormalizedMapQuery'
+        offline_threshold_seconds:
+          type: integer
+          const: 30
+        returned:
+          type: integer
+          minimum: 0
+          maximum: 5000
+        unlocated_count:
+          type: integer
+          minimum: 0
+        complete:
+          type: boolean
+          const: true
+        poll_after_ms:
+          type: integer
+          minimum: 3000
+          maximum: 5000
+        items:
+          type: array
+          maxItems: 5000
+          items:
+            $ref: '#/components/schemas/DeviceMapItem'
+    NormalizedMapQuery:
+      type: object
+      additionalProperties: false
+      required: [bbox, device_types, status, q]
+      properties:
+        bbox:
+          type: array
+          minItems: 4
+          maxItems: 4
+          items:
+            type: number
+        device_types:
+          type: array
+          maxItems: 50
+          items:
+            type: string
+        status:
+          type: string
+          enum: [all, online, offline]
+        q:
+          type: [string, 'null']
+    DeviceMapItem:
+      type: object
+      additionalProperties: false
+      required:
+        - device_id
+        - code
+        - name
+        - device_type
+        - mobility
+        - position
+        - position_source
+        - position_observed_at
+        - position_version
+        - state_version
+        - last_seen_at
+        - online
+        - is_static
+        - alert_level
+      properties:
+        device_id:
+          type: string
+          minLength: 1
+        code:
+          type: string
+          minLength: 1
+        name:
+          type: string
+          minLength: 1
+        device_type:
+          $ref: '#/components/schemas/DeviceTypeSummary'
+        mobility:
+          type: string
+          enum: [fixed, mobile]
+        position:
+          $ref: '#/components/schemas/GeoJsonPoint'
+        position_source:
+          type: string
+          enum: [object_location, device_state_valid_gps]
+        position_observed_at:
+          type: string
+          format: date-time
+        position_version:
+          type: integer
+          minimum: 0
+        state_version:
+          type: integer
+          minimum: 0
+        last_seen_at:
+          type: string
+          format: date-time
+        online:
+          type: boolean
+          description: True when generated_at minus last_seen_at is at most 30 seconds.
+        speed_kph:
+          type: [number, 'null']
+          minimum: 0
+        course_deg:
+          type: [number, 'null']
+          minimum: 0
+          exclusiveMaximum: 360
+        is_static:
+          type: boolean
+        latest_gps_status:
+          type: [string, 'null']
+          description: A void status never advances the canonical display position.
+        alert_level:
+          type: string
+        active_preset_id:
+          type: [string, 'null']
+        preset_source:
+          type: [string, 'null']
+    DeviceTypeSummary:
+      type: object
+      additionalProperties: false
+      required: [code, name]
+      properties:
+        code:
+          type: string
+          examples: [lpr_camera, bus_gps, env_multi, signal_ctrl]
+        name:
+          type: string
+        icon_id:
+          type: [string, 'null']
+        ui_panel:
+          type: [string, 'null']
+    GeoJsonPoint:
+      type: object
+      additionalProperties: false
+      required: [type, coordinates]
+      properties:
+        type:
+          type: string
+          const: Point
+        coordinates:
+          type: array
+          minItems: 2
+          maxItems: 2
+          prefixItems:
+            - type: number
+              minimum: -180
+              maximum: 180
+            - type: number
+              minimum: -90
+              maximum: 90
+    Problem:
+      type: object
+      required: [type, title, status]
+      properties:
+        type:
+          type: string
+          format: uri-reference
+        title:
+          type: string
+        status:
+          type: integer
+        code:
+          type: string
+        detail:
+          type: string
+    ViewportTooDenseProblem:
+      allOf:
+        - $ref: '#/components/schemas/Problem'
+        - type: object
+          required: [code, matched, max_items]
+          properties:
+            status:
+              const: 422
+            code:
+              const: VIEWPORT_TOO_DENSE
+            matched:
+              type: integer
+              minimum: 5001
+            max_items:
+              type: integer
+              const: 5000
