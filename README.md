@@ -40,8 +40,13 @@ npm run dev
 Các biến môi trường bản đồ:
 
 - `NEXT_PUBLIC_API_BASE_URL`: backend Device Map API.
+- `NEXT_PUBLIC_USE_MOCK_API`: đặt `true` để dùng mock API tích hợp tại cùng origin; development mặc định dùng mock khi biến này chưa được khai báo.
 - `NEXT_PUBLIC_MAP_TILE_URL` và `NEXT_PUBLIC_MAP_TILE_ATTRIBUTION`: tile provider và attribution.
 - `NEXT_PUBLIC_DEVICE_MAP_POLL_MS`: chu kỳ polling, chỉ nhận 3.000–5.000 ms.
+
+Với `.env.example` mặc định, mở `http://localhost:3000/map` sẽ hiển thị 120 thiết bị mẫu. Xe bus
+di chuyển theo mỗi chu kỳ poll; camera, cảm biến và tủ điều khiển giữ nguyên vị trí. Để nối backend
+thật, đặt `NEXT_PUBLIC_USE_MOCK_API=false` và cấu hình `NEXT_PUBLIC_API_BASE_URL`.
 
 Backend phải triển khai [OpenAPI contract](specs/001-realtime-device-map/contracts/device-map.openapi.yaml).
 Khi backend chưa sẵn sàng, test dùng MSW handlers trong `tests/mocks/device-map/`; mock không thay thế

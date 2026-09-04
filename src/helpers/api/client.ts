@@ -1,5 +1,8 @@
 import axios, { AxiosError } from "axios";
 
+const useLocalMockApi = process.env.NEXT_PUBLIC_USE_MOCK_API === "true"
+  || (process.env.NEXT_PUBLIC_USE_MOCK_API === undefined && process.env.NODE_ENV === "development");
+
 export interface NormalizedApiError {
   readonly status?: number;
   readonly code?: string;
@@ -9,7 +12,7 @@ export interface NormalizedApiError {
 }
 
 export const apiClient = axios.create({
-  baseURL: process.env.NEXT_PUBLIC_API_BASE_URL ?? "http://localhost:8080",
+  baseURL: useLocalMockApi ? "" : (process.env.NEXT_PUBLIC_API_BASE_URL ?? "http://localhost:8080"),
   timeout: 10_000,
   withCredentials: true,
   headers: { Accept: "application/json" },
