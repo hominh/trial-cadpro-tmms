@@ -1,0 +1,34 @@
+name: Feature
+description: Đề xuất capability hoặc user outcome mới
+title: "feat: "
+labels:
+  - enhancement
+body:
+  - type: textarea
+    id: problem
+    attributes:
+      label: Vấn đề và giá trị
+      description: Ai gặp vấn đề gì và kết quả mong muốn là gì?
+    validations:
+      required: true
+  - type: textarea
+    id: acceptance
+    attributes:
+      label: Acceptance criteria
+      description: Viết các kết quả quan sát được và đo được.
+      placeholder: |
+        - Given ... when ... then ...
+    validations:
+      required: true
+  - type: textarea
+    id: data
+    attributes:
+      label: API, realtime và dữ liệu không gian
+      description: Nêu API, polling, viewport và mục tiêu 2.000+ thiết bị, hoặc ghi N/A.
+    validations:
+      required: true
+  - type: textarea
+    id: risks
+    attributes:
+      label: Rủi ro và phụ thuộc
+      description: Bao gồm security, migration và dependency bên ngoài.

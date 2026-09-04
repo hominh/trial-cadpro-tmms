@@ -1,0 +1,1717 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="description" content="Consolidated architecture decision record for the CadPro TMMS device data platform: schema findings, payload validation, target design, 38 decisions and full DDL.">
+<style>
+:root{color-scheme:light dark}
+html{-webkit-text-size-adjust:100%}
+img{max-width:100%;height:auto}
+[hidden]{display:none!important}
+@media print{
+  nav{display:none!important}
+  .shell{display:block!important;max-width:none}
+  main{padding:0!important}
+  figure,.tw,.sql,.note{break-inside:avoid;page-break-inside:avoid}
+  h2{break-before:page;page-break-before:always}
+  h2:first-of-type{break-before:auto;page-break-before:auto}
+  a{color:inherit;text-decoration:none}
+}
+</style>
+<title>CadPro TMMS Data Architecture</title>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans:wght@400;500;600;700&family=IBM+Plex+Serif:ital,wght@0,400;0,600;1,400&family=IBM+Plex+Mono:wght@400;500&display=swap">
+<style>
+:root{
+  --ground:#F4F6F8;
+  --surface:#FFFFFF;
+  --surface-2:#EDF1F4;
+  --ink:#101922;
+  --ink-2:#3E4C5A;
+  --ink-3:#6C7A88;
+  --rule:#D7DEE5;
+  --rule-2:#E7ECF1;
+  --accent:#0A6478;
+  --accent-2:#0E8AA6;
+  --accent-wash:#E2F0F4;
+  --ok:#1B6E45;
+  --warn:#96590A;
+  --crit:#A62B21;
+  --ok-wash:#E3F0E9;
+  --warn-wash:#F7EEDE;
+  --crit-wash:#F7E6E4;
+  --code-bg:#F0F3F6;
+  --shadow:0 1px 2px rgba(16,25,34,.06),0 8px 24px -16px rgba(16,25,34,.18);
+  --sans:"IBM Plex Sans",system-ui,-apple-system,Segoe UI,sans-serif;
+  --serif:"IBM Plex Serif",Georgia,"Times New Roman",serif;
+  --mono:"IBM Plex Mono",ui-monospace,SFMono-Regular,Menlo,monospace;
+}
+@media (prefers-color-scheme:dark){
+  :root:not([data-theme="light"]){
+    --ground:#0B1117;
+    --surface:#131C24;
+    --surface-2:#1A252F;
+    --ink:#E4EAF0;
+    --ink-2:#B3C0CC;
+    --ink-3:#8493A1;
+    --rule:#2A3843;
+    --rule-2:#1F2B35;
+    --accent:#4FC0D8;
+    --accent-2:#7AD4E7;
+    --accent-wash:#12303A;
+    --ok:#5FCB93;
+    --warn:#E0A24B;
+    --crit:#F08076;
+    --ok-wash:#14301F;
+    --warn-wash:#33260F;
+    --crit-wash:#361A17;
+    --code-bg:#0E1620;
+    --shadow:0 1px 2px rgba(0,0,0,.4),0 8px 24px -16px rgba(0,0,0,.7);
+  }
+}
+:root[data-theme="dark"]{
+  --ground:#0B1117;
+  --surface:#131C24;
+  --surface-2:#1A252F;
+  --ink:#E4EAF0;
+  --ink-2:#B3C0CC;
+  --ink-3:#8493A1;
+  --rule:#2A3843;
+  --rule-2:#1F2B35;
+  --accent:#4FC0D8;
+  --accent-2:#7AD4E7;
+  --accent-wash:#12303A;
+  --ok:#5FCB93;
+  --warn:#E0A24B;
+  --crit:#F08076;
+  --ok-wash:#14301F;
+  --warn-wash:#33260F;
+  --crit-wash:#361A17;
+  --code-bg:#0E1620;
+  --shadow:0 1px 2px rgba(0,0,0,.4),0 8px 24px -16px rgba(0,0,0,.7);
+}
+
+*{box-sizing:border-box}
+body{
+  margin:0;background:var(--ground);color:var(--ink);
+  font-family:var(--serif);font-size:16px;line-height:1.65;
+  -webkit-font-smoothing:antialiased;
+}
+.shell{display:grid;grid-template-columns:264px minmax(0,1fr);gap:0;max-width:1440px;margin:0 auto}
+
+/* ---------- nav ---------- */
+nav{
+  position:sticky;top:0;align-self:start;height:100vh;overflow-y:auto;
+  padding:28px 20px 40px;border-right:1px solid var(--rule);
+  background:var(--surface);font-family:var(--sans);font-size:13px;line-height:1.45;
+}
+.brand{font-weight:600;font-size:14px;letter-spacing:-.01em;margin:0 0 2px}
+.brand-sub{color:var(--ink-3);font-size:11.5px;text-transform:uppercase;letter-spacing:.09em;margin:0 0 22px}
+nav ol{list-style:none;margin:0;padding:0;counter-reset:sec}
+nav > ol > li{counter-increment:sec;margin-bottom:3px}
+nav a{
+  display:flex;gap:9px;text-decoration:none;color:var(--ink-2);
+  padding:5px 8px;border-radius:4px;
+}
+nav > ol > li > a::before{
+  content:counter(sec,decimal-leading-zero);
+  font-family:var(--mono);font-size:11px;color:var(--ink-3);
+  flex:none;padding-top:1px;
+}
+nav a:hover{background:var(--surface-2);color:var(--ink)}
+nav a:focus-visible{outline:2px solid var(--accent);outline-offset:1px}
+nav ol ol{padding-left:28px;margin:1px 0 5px;counter-reset:none}
+nav ol ol li{counter-increment:none}
+nav ol ol a{font-size:12.5px;color:var(--ink-3);padding:3px 8px}
+
+/* ---------- main ---------- */
+main{padding:0 0 96px;min-width:0}
+.wrap{max-width:74ch;padding:0 40px}
+.wide{max-width:1060px;padding:0 40px}
+
+header.hd{padding:44px 40px 30px;border-bottom:1px solid var(--rule);margin-bottom:34px}
+.eyebrow{
+  font-family:var(--mono);font-size:11.5px;letter-spacing:.11em;text-transform:uppercase;
+  color:var(--accent);margin:0 0 12px;
+}
+h1{
+  font-family:var(--sans);font-weight:600;font-size:37px;line-height:1.12;
+  letter-spacing:-.022em;margin:0 0 12px;text-wrap:balance;max-width:22ch;
+}
+.standfirst{font-size:18px;line-height:1.55;color:var(--ink-2);margin:0 0 24px;max-width:62ch}
+.meta{display:flex;flex-wrap:wrap;gap:0 30px;font-family:var(--mono);font-size:12px;color:var(--ink-3)}
+.meta b{color:var(--ink-2);font-weight:500}
+
+h2{
+  font-family:var(--sans);font-weight:600;font-size:25px;line-height:1.2;
+  letter-spacing:-.017em;margin:56px 0 6px;text-wrap:balance;
+  padding-top:22px;border-top:2px solid var(--ink);
+}
+h2 .n{
+  display:block;font-family:var(--mono);font-size:11.5px;font-weight:400;
+  letter-spacing:.11em;color:var(--accent);margin-bottom:9px;text-transform:uppercase;
+}
+h3{font-family:var(--sans);font-weight:600;font-size:17.5px;letter-spacing:-.01em;margin:34px 0 8px;text-wrap:balance}
+h4{font-family:var(--sans);font-weight:600;font-size:14px;margin:24px 0 6px;color:var(--ink-2)}
+p{margin:0 0 16px}
+a{color:var(--accent);text-underline-offset:2px}
+strong{font-weight:600}
+code{font-family:var(--mono);font-size:.855em;background:var(--code-bg);padding:.1em .32em;border-radius:3px;color:var(--ink)}
+ul,ol{margin:0 0 16px;padding-left:1.3em}
+li{margin-bottom:6px}
+
+/* ---------- key figures ---------- */
+.figs{
+  display:grid;grid-template-columns:repeat(auto-fit,minmax(168px,1fr));
+  gap:1px;background:var(--rule);border:1px solid var(--rule);margin:26px 0 8px;
+}
+.fig{background:var(--surface);padding:15px 17px}
+.fig dt{
+  font-family:var(--mono);font-size:10.5px;letter-spacing:.08em;text-transform:uppercase;
+  color:var(--ink-3);margin-bottom:6px;
+}
+.fig dd{
+  margin:0;font-family:var(--sans);font-weight:600;font-size:23px;letter-spacing:-.02em;
+  font-variant-numeric:tabular-nums;line-height:1.1;
+}
+.fig dd small{display:block;font-family:var(--serif);font-weight:400;font-size:12.5px;color:var(--ink-3);letter-spacing:0;margin-top:5px;line-height:1.4}
+
+/* ---------- tables ---------- */
+.tw{overflow-x:auto;margin:20px 0 26px;border:1px solid var(--rule);background:var(--surface)}
+table{border-collapse:collapse;width:100%;font-family:var(--sans);font-size:13.5px;line-height:1.45}
+th,td{text-align:left;padding:9px 13px;border-bottom:1px solid var(--rule-2);vertical-align:top}
+thead th{
+  background:var(--surface-2);font-weight:600;font-size:11px;letter-spacing:.075em;
+  text-transform:uppercase;color:var(--ink-2);border-bottom:1px solid var(--rule);white-space:nowrap;
+}
+tbody tr:last-child td{border-bottom:none}
+td.num,th.num{font-family:var(--mono);font-variant-numeric:tabular-nums;text-align:right;white-space:nowrap}
+td code{font-size:12px;background:transparent;padding:0}
+.did{font-family:var(--mono);font-weight:500;font-size:12.5px;color:var(--accent);white-space:nowrap}
+
+.tag{
+  display:inline-block;font-family:var(--mono);font-size:10.5px;font-weight:500;
+  padding:1px 6px;border-radius:3px;letter-spacing:.04em;white-space:nowrap;
+}
+.t-crit{background:var(--crit-wash);color:var(--crit)}
+.t-warn{background:var(--warn-wash);color:var(--warn)}
+.t-ok{background:var(--ok-wash);color:var(--ok)}
+.t-new{background:var(--accent-wash);color:var(--accent)}
+
+/* ---------- callouts ---------- */
+.note{
+  border-left:3px solid var(--accent);background:var(--surface);
+  padding:15px 18px;margin:22px 0;box-shadow:var(--shadow);
+}
+.note.crit{border-left-color:var(--crit)}
+.note.warn{border-left-color:var(--warn)}
+.note > :last-child{margin-bottom:0}
+.note h4{margin-top:0;font-family:var(--sans);font-size:13px;letter-spacing:.02em;color:var(--ink)}
+
+/* ---------- code ---------- */
+.sql{
+  margin:16px 0 26px;background:var(--code-bg);border:1px solid var(--rule);
+  border-left:3px solid var(--accent);overflow-x:auto;
+}
+.sql pre{
+  margin:0;padding:15px 18px;font-family:var(--mono);font-size:12.5px;line-height:1.62;
+  color:var(--ink-2);white-space:pre;
+}
+.sql .cap{
+  font-family:var(--mono);font-size:11px;letter-spacing:.07em;text-transform:uppercase;
+  color:var(--ink-3);padding:9px 18px 0;
+}
+
+/* ---------- figures ---------- */
+figure{margin:30px 0 34px;background:var(--surface);border:1px solid var(--rule);padding:22px 22px 16px;box-shadow:var(--shadow)}
+figure svg{display:block;width:100%;height:auto;max-width:100%;color:var(--ink-2)}
+figcaption{
+  font-family:var(--sans);font-size:12.5px;line-height:1.5;color:var(--ink-3);
+  margin-top:14px;padding-top:12px;border-top:1px solid var(--rule-2);
+}
+figcaption b{color:var(--ink-2);font-weight:600}
+.legend{display:flex;flex-wrap:wrap;gap:6px 20px;margin-top:14px;font-family:var(--sans);font-size:12px;color:var(--ink-2)}
+.legend span{display:flex;align-items:center;gap:7px}
+.sw{width:11px;height:11px;flex:none;border-radius:2px}
+
+.lede{font-size:17px;color:var(--ink-2);border-left:3px solid var(--rule);padding-left:18px;margin:0 0 28px}
+.super{text-decoration:line-through;color:var(--ink-3)}
+footer{
+  margin-top:64px;padding:26px 40px 0;border-top:1px solid var(--rule);
+  font-family:var(--sans);font-size:12.5px;color:var(--ink-3);max-width:1060px;
+}
+
+@media (max-width:900px){
+  .shell{grid-template-columns:1fr}
+  nav{position:static;height:auto;border-right:none;border-bottom:1px solid var(--rule)}
+  nav ol ol{display:none}
+  .wrap,.wide,header.hd,footer{padding-left:22px;padding-right:22px}
+  h1{font-size:29px}
+}
+@media (prefers-reduced-motion:reduce){*{animation:none!important;transition:none!important}}
+</style>
+</head>
+<body>
+<div class="shell">
+<nav>
+  <p class="brand">TMMS Data Architecture</p>
+  <p class="brand-sub">ADR-001 → 004 · consolidated</p>
+  <ol>
+    <li><a href="#summary">Summary</a></li>
+    <li><a href="#baseline">Measured baseline</a>
+      <ol><li><a href="#payload">Payload composition</a></li></ol>
+    </li>
+    <li><a href="#findings">Findings</a></li>
+    <li><a href="#arch">Architecture</a>
+      <ol>
+        <li><a href="#axis">Partition axis</a></li>
+        <li><a href="#entities">Entity schema</a></li>
+        <li><a href="#flow">Data flow</a></li>
+        <li><a href="#manifest">The manifest</a></li>
+        <li><a href="#layers">Layer walkthrough</a></li>
+        <li><a href="#moving">Moving objects</a></li>
+      </ol>
+    </li>
+    <li><a href="#streams">Stream taxonomy</a></li>
+    <li><a href="#decisions">Decisions D1–D38</a></li>
+    <li><a href="#ddl">Full DDL</a>
+      <ol>
+        <li><a href="#ddl-registry">Registry</a></li>
+        <li><a href="#ddl-features">Features &amp; presets</a></li>
+        <li><a href="#ddl-manifest">Manifest</a></li>
+        <li><a href="#ddl-ingest">Ingest</a></li>
+        <li><a href="#ddl-serving">Serving</a></li>
+        <li><a href="#ddl-command">Command</a></li>
+        <li><a href="#ddl-pipeline">Pipeline</a></li>
+      </ol>
+    </li>
+    <li><a href="#worker">Worker rules</a></li>
+    <li><a href="#actions">Immediate actions</a></li>
+    <li><a href="#sizing">Sizing</a></li>
+    <li><a href="#open">Open questions</a></li>
+  </ol>
+</nav>
+
+<main>
+<header class="hd">
+  <p class="eyebrow">Architecture decision record · consolidated</p>
+  <h1>Device &amp; sensor data architecture</h1>
+  <p class="standfirst">A schema review of the Da Nang traffic platform, four device-payload validations, and the target design: a bounded set of stream shapes, a declarative field manifest, and typed projections replacing attribute search over JSONB.</p>
+  <div class="meta">
+    <span><b>PostgreSQL</b> 16.14</span>
+    <span><b>Scope</b> CadPro TMMS</span>
+    <span><b>Decisions</b> 38</span>
+    <span><b>Status</b> draft for review</span>
+    <span><b>Date</b> 3 Sep 2026</span>
+  </div>
+</header>
+
+<div class="wrap">
+<h2 id="summary"><span class="n">Section one</span>Summary</h2>
+<p class="lede">The platform stores every device reading in one JSONB table partitioned by customer and month. Adding a device type is cheap; querying by payload attribute is not. The fix is not more indexing — it is making payload <em>shape</em> a first-class physical dimension, and moving three kinds of data out of the event row that were never event data.</p>
+
+<h3>What the measurements showed</h3>
+<p>The existing production tables already contain the proof that typed projections work. <code>devicedata_platenumber</code> — a hand-built projection of one payload shape — holds 76% of the same events in 10% of the space.</p>
+</div>
+
+<div class="wide">
+<dl class="figs">
+  <div class="fig"><dt>Raw table, Aug 2026</dt><dd>1,199 GB<small>624,247,424 rows · ~2,060 B/row</small></dd></div>
+  <div class="fig"><dt>Typed projection</dt><dd>124 GB<small>472,131,776 rows · ~282 B/row</small></dd></div>
+  <div class="fig"><dt>Density gain</dt><dd>7.3×<small>measured, not projected</small></dd></div>
+  <div class="fig"><dt>Detection payload that is not event data</dt><dd>68%<small>track blob, mutable state, registry and label duplication</small></dd></div>
+  <div class="fig"><dt>Violations as a share of detections</dt><dd>0.018%<small>83,295 of 472,215,071</small></dd></div>
+  <div class="fig"><dt>Worst user-facing query</dt><dd>324 s<small>officer screen, mean over 48 calls</small></dd></div>
+</dl>
+</div>
+
+<div class="wrap">
+<h3>The five conclusions</h3>
+<ol>
+  <li><strong>Device type is the wrong axis; payload shape is the right one.</strong> One AI camera emits detections, traffic counts and health reports. Device types grow with every customer; payload shapes do not — there are eight, and adding a device type adds none.</li>
+  <li><strong>A declarative field manifest replaces five scattered metadata tables.</strong> One declaration per field drives ingest parsing, projection DDL, API filters, the generated UI panel and the Vietnamese labels.</li>
+  <li><strong>48% of every detection row is a trajectory blob nobody queries.</strong> Moving it to the archive cuts the 2,000-camera NVMe requirement from ~12.4 TB to ~5.2 TB.</li>
+  <li><strong>Postgres only.</strong> Customers run their own on-prem deployments, so a second database server is a support liability. The archive tier is Parquet on the existing NAS, read in-process by DuckDB.</li>
+  <li><strong>The multi-tenant layer is a design error and a live isolation defect.</strong> One deployment per customer means <code>project_code</code> — and the watchlist tables currently shared across customers — should not exist.</li>
+</ol>
+
+<h2 id="baseline"><span class="n">Section two</span>Measured baseline</h2>
+<p>All figures from <code>pg_class</code>, <code>pg_stat_statements</code> and <code>TABLESAMPLE</code> on the existing instance, September 2026. Growth is camera-driven and confirmed real: <strong>200 → 700 cameras</strong> between July and August took the table from 118M to 624M rows per month. Target deployment is <strong>2,000+ cameras</strong>, which implies ~28,750 events per camera per day and ~1.75 billion rows per month.</p>
+</div>
+
+<div class="wide">
+<div class="tw"><table>
+<thead><tr><th>Table (Aug 2026)</th><th class="num">Rows</th><th class="num">Size</th><th class="num">Bytes/row</th></tr></thead>
+<tbody>
+<tr><td><code>devicedata_cadn_2026_08</code> — raw</td><td class="num">624,247,424</td><td class="num">1,199 GB</td><td class="num">~2,060</td></tr>
+<tr><td><code>devicedata_cadn_2026_07</code> — raw</td><td class="num">118,307,976</td><td class="num">188 GB</td><td class="num">~1,700</td></tr>
+<tr><td><code>..._platenumber_cadn_w0_2026_08</code> — projection</td><td class="num">472,131,776</td><td class="num">124 GB</td><td class="num">~282</td></tr>
+<tr><td><code>..._platenumber_cadn_w1_2026_08</code> — warnings only</td><td class="num">83,295</td><td class="num">35 MB</td><td class="num">~440</td></tr>
+</tbody></table></div>
+
+<h3 id="payload">Payload composition</h3>
+<figure>
+<svg viewBox="0 0 980 224" role="img" aria-label="A stacked bar showing that of 2,859 bytes in one LPR detection payload, 1,377 bytes are a trajectory blob, 269 bytes mutable workflow state, 183 bytes duplicated device registry attributes and 109 bytes duplicated Vietnamese labels, leaving 921 bytes of genuine per-event data.">
+  <defs>
+    <marker id="ar" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
+      <path d="M0,1 L9,5 L0,9 z" fill="currentColor"/>
+    </marker>
+  </defs>
+  <text x="40" y="26" font-family="IBM Plex Mono, monospace" font-size="12" fill="currentColor" letter-spacing="1">ONE LPR DETECTION EVENT · 2,859 BYTES COMPACT JSON</text>
+
+  <rect x="40" y="44" width="434" height="54" fill="#A62B21" opacity="0.82"/>
+  <rect x="474" y="44" width="85" height="54" fill="#96590A" opacity="0.82"/>
+  <rect x="559" y="44" width="58" height="54" fill="#96590A" opacity="0.5"/>
+  <rect x="617" y="44" width="34" height="54" fill="#96590A" opacity="0.3"/>
+  <rect x="651" y="44" width="289" height="54" fill="#0A6478"/>
+  <rect x="40" y="44" width="900" height="54" fill="none" stroke="currentColor" stroke-width="1" opacity="0.35"/>
+
+  <text x="57" y="77" font-family="IBM Plex Sans, sans-serif" font-size="14" font-weight="600" fill="#ffffff">48.2%</text>
+  <text x="668" y="77" font-family="IBM Plex Sans, sans-serif" font-size="14" font-weight="600" fill="#ffffff">32.2%</text>
+
+  <line x1="40" y1="108" x2="40" y2="122" stroke="currentColor" stroke-width="1" opacity="0.4"/>
+  <line x1="474" y1="108" x2="474" y2="122" stroke="currentColor" stroke-width="1" opacity="0.4"/>
+  <line x1="651" y1="108" x2="651" y2="122" stroke="currentColor" stroke-width="1" opacity="0.4"/>
+  <line x1="940" y1="108" x2="940" y2="122" stroke="currentColor" stroke-width="1" opacity="0.4"/>
+
+  <text x="40" y="140" font-family="IBM Plex Mono, monospace" font-size="11.5" fill="currentColor">nvaevent_data · 1,377 B</text>
+  <text x="474" y="140" font-family="IBM Plex Mono, monospace" font-size="11.5" fill="currentColor">561 B</text>
+  <text x="940" y="140" text-anchor="end" font-family="IBM Plex Mono, monospace" font-size="11.5" fill="currentColor">921 B</text>
+
+  <line x1="40" y1="166" x2="474" y2="166" stroke="currentColor" stroke-width="1.5" opacity="0.6" marker-start="url(#ar)" marker-end="url(#ar)"/>
+  <line x1="474" y1="166" x2="651" y2="166" stroke="currentColor" stroke-width="1.5" opacity="0.6" marker-start="url(#ar)" marker-end="url(#ar)"/>
+  <line x1="651" y1="166" x2="940" y2="166" stroke="currentColor" stroke-width="1.5" opacity="0.6" marker-start="url(#ar)" marker-end="url(#ar)"/>
+
+  <text x="257" y="188" text-anchor="middle" font-family="IBM Plex Sans, sans-serif" font-size="12.5" font-weight="600" fill="currentColor">moves to archive</text>
+  <text x="562" y="188" text-anchor="middle" font-family="IBM Plex Sans, sans-serif" font-size="12.5" font-weight="600" fill="currentColor">moves to other tables</text>
+  <text x="795" y="188" text-anchor="middle" font-family="IBM Plex Sans, sans-serif" font-size="12.5" font-weight="600" fill="currentColor">stays in stream_detection</text>
+  <text x="257" y="206" text-anchor="middle" font-family="IBM Plex Sans, sans-serif" font-size="12" fill="currentColor" opacity="0.7">43 × (t, x, y, w, h), never filtered on</text>
+  <text x="562" y="206" text-anchor="middle" font-family="IBM Plex Sans, sans-serif" font-size="12" fill="currentColor" opacity="0.7">mutable state · registry · labels</text>
+  <text x="795" y="206" text-anchor="middle" font-family="IBM Plex Sans, sans-serif" font-size="12" fill="currentColor" opacity="0.7">what actually varies per event</text>
+</svg>
+<div class="legend">
+  <span><i class="sw" style="background:#A62B21;opacity:.82"></i>Object trajectory blob — 1,377 B</span>
+  <span><i class="sw" style="background:#96590A;opacity:.82"></i>Mutable workflow state, 11 keys — 269 B</span>
+  <span><i class="sw" style="background:#96590A;opacity:.5"></i>Device registry duplication, 7 keys — 183 B</span>
+  <span><i class="sw" style="background:#96590A;opacity:.3"></i>Vietnamese label duplication, 4 keys — 109 B</span>
+  <span><i class="sw" style="background:#0A6478"></i>Genuine per-event payload — 921 B</span>
+</div>
+<figcaption><b>68% of the row is not event data.</b> <code>nvaevent_data</code> is an object trajectory — 43 samples of position and size within the camera frame — whose header re-states values already present as typed fields beside it. Nothing filters on it; it is replay evidence for a single event, held in the hottest table in the system. <code>nva_url_lan</code> alone is stored roughly twenty million times a day.</figcaption>
+</figure>
+</div>
+
+<div class="wrap">
+<h2 id="findings"><span class="n">Section three</span>Findings</h2>
+<p>Two classes: defects that are costing correctness or latency today, and structural problems the target schema resolves.</p>
+</div>
+
+<div class="wide">
+<h3>Correctness and latency</h3>
+<div class="tw"><table>
+<thead><tr><th>Finding</th><th>Evidence</th><th>Impact</th></tr></thead>
+<tbody>
+<tr><td><span class="tag t-crit">P0</span> <strong><code>OR</code> on the partition key defeats pruning</strong></td><td><code>PARTITION BY LIST (nvaevent_warning)</code> with a predicate <code>(nvaevent_warning = $7 OR …)</code>. Mean <strong>324,112 ms</strong> over 48 calls; variants at 50,514 ms and 30,406 ms; cache hit 79–86%</td><td>Scans both subtrees — 472M rows — to return from a population of 83k. Serves a screen an officer waits at. Almost certainly the optional-parameter <code>OR $7 IS NULL</code> pattern</td></tr>
+<tr><td><strong>Three writers to the projection, no unique key</strong></td><td>Trigger + backfill procedure + direct application inserts (4,149 calls @1,253 ms; 12,153 @397 ms). The application sets <code>error_bitmask</code>/<code>nvaevent_cam</code>; the trigger does not</td><td>No guardrail. A duplicate audit of one partition returned zero — they miss each other by luck of project and datatype, not design. Unchecked window: SODN from 2026-07-08</td></tr>
+<tr><td><span class="tag t-crit">Isolation</span> <strong>Watchlist config is shared across customers</strong></td><td><code>list_categories</code>, <code>whitelist_alert_rules</code>, <code>whitelist_entry_rules</code> carry no <code>project_code</code> — yet <code>blacklist_entries.category_id</code> references <code>list_categories</code></td><td>One customer's watchlist categories and alert rules are visible to every other. In a police system holding blacklists this is a defect, not untidiness</td></tr>
+<tr><td><strong>Tenant ownership is derived, not stored</strong></td><td><code>devices</code> resolves via <code>object_id → object.project_code</code>; <code>alert_logs</code> via <code>device_id → devices → object</code>. No foreign keys on any hop</td><td>Orphans may belong to no customer, and become unrecoverable once deployments are split</td></tr>
+<tr><td><strong>Statistics blind on the largest tables</strong></td><td><code>..._w0_2026_09</code>: <code>last_analyze = NULL</code> at 42.9M rows. <code>..._w0_2026_10</code>: <code>reltuples = -1</code>. Default <code>autovacuum_analyze_scale_factor = 0.1</code> means analyze fires after 62M row changes</td><td>The planner is guessing on the biggest relations. Likely part of the 30–50 s variance</td></tr>
+<tr><td><strong>An index byte-identical to the primary key</strong></td><td>PK is <code>(project_code, times, id)</code>; <code>idx_cadn_project_time_id</code> is <code>btree (project_code, times, id)</code></td><td>~25–30 GB per large partition, and paid on every one of ~40M daily inserts</td></tr>
+<tr><td><strong>Index expression mismatch</strong></td><td>Predicate <code>COALESCE(TRIM(datajson-&gt;&gt;'nvaevent_platenumber'))</code>; index on the <em>untrimmed</em> expression. 259,719 calls in window</td><td>A btree expression index matches only exactly — <code>TRIM()</code> disqualifies it</td></tr>
+<tr><td><strong>Raw JSONB still on the read path</strong></td><td><code>v.datajson-&gt;&gt;$6 as video_url</code> (772 calls @16,906 ms); <code>nvaevent.datajson-&gt;&gt;$4</code> (35,834 @252 ms)</td><td>The projection is incomplete; any queried field must be projected</td></tr>
+<tr><td><strong>Lost-row race in the backfill cursor</strong></td><td>The procedure reads to the head of the table on <code>id &gt; last_id</code>. Ids are allocated in sequence order but <strong>commit out of order</strong></td><td>Advancing the cursor past an uncommitted lower id loses that row permanently, silently</td></tr>
+</tbody></table></div>
+
+<h3>Structural</h3>
+<div class="tw"><table>
+<thead><tr><th>Finding</th><th>Consequence</th></tr></thead>
+<tbody>
+<tr><td><strong>No payload discriminator on the data.</strong> <code>datatype</code> is a nullable integer with no lookup table, no <code>CHECK</code>, and no place in any partition key</td><td>Root cause of slow attribute search — the dimension every query filters on is invisible to the planner</td></tr>
+<tr><td><strong>No manifest.</strong> Field semantics are spread across <code>configuration.config_fields</code>, <code>configuration_object.config_fields</code>, <code>devices.dataview</code>, <code>devices_vietsub_mapping</code> and <code>infotype</code></td><td>Five partial registries, none authoritative. "Config-only" device onboarding is impossible today</td></tr>
+<tr><td><strong>Business logic in the write path.</strong> The insert trigger hardcodes <code>project_code IN ('SODN','CADN')</code>, <code>datatype = 7</code>, a cutover date, and bit-shift decoding of <code>nvaevent_checkout</code></td><td>A synchronous tax on ~40M inserts a day, and a projection error aborts ingest</td></tr>
+<tr><td><strong>Location stored three times.</strong> <code>object.longitude/latitude</code> plus <code>object.location</code> (GiST-indexed); <code>devices.longitude/latiude</code> (typo, unindexed); <code>devicedata.latitude/longitude</code> — with a row-level trigger updating <code>object</code> per datapoint</td><td>Only one copy is queryable, and the map's own table takes an <code>UPDATE</code> on every GPS ping</td></tr>
+<tr><td><strong><code>project_code</code> is the top-level partition key</strong>, and the partition-creation function hardcodes the project list</td><td>Every new customer required a code change — the exact outcome the design was meant to avoid</td></tr>
+<tr><td><strong>Three overlapping encodings of the same AI result.</strong> <code>nvaevent_feature</code> tags carry colour, brand and helmet state; <code>nvaevent_checkout</code> bit-packs colour and brand; <code>error_bitmask</code> carries violations <em>including</em> no-helmet</td><td>Helmet status exists twice with no declared authority. In a fine-issuing system, "which field is the evidence?" must have exactly one answer</td></tr>
+<tr><td><strong>Mixed timestamp types.</strong> <code>alert_logs.detected_at</code>, <code>blacklist_entries.created_at</code> and <code>list_categories.*</code> are <code>timestamp without time zone</code>; <code>devicedata.times</code> is <code>timestamptz</code></td><td>Every comparison across the two is wrong by seven hours in a UTC+7 deployment</td></tr>
+<tr><td><strong>Three incompatible envelope conventions.</strong> Camera: flat, all-strings, <code>nvaevent_*</code>. GPS and environment: nested <code>{Dev, DevMsg}</code>, and they disagree on casing (<code>Dev.time</code> vs <code>Dev.Time</code>). Controller: flat, native types, <code>CtrlData_*</code></td><td>There is no envelope standard, and there never will be. The manifest's <code>source_path</code> is what absorbs it</td></tr>
+</tbody></table></div>
+</div>
+
+<div class="wrap">
+<h2 id="arch"><span class="n">Section four</span>Architecture</h2>
+<p>The design rests on one distinction. <strong>Device type</strong> answers "what is this hardware?" and governs identity, icon, map layer and permissions; it is open-ended and grows with every customer. <strong>Stream type</strong> answers "what shape is this message?" and governs storage, partitioning, indexes, retention and chart type; it is bounded at eight and adding a device type adds none.</p>
+<p>A device's enabled <em>features</em> — not its type — determine which streams it emits, because CadPro devices are smart units with feature toggles and LPR is one of them.</p>
+</div>
+
+<div class="wide">
+<h3 id="axis">The partition axis</h3>
+<figure>
+<svg viewBox="0 0 980 372" role="img" aria-label="Two diagrams compared. Currently devicedata partitions by project_code then month, so a query for one payload shape scans all 624 million rows of mixed shapes in that month. In the target design it partitions by stream_type then day, so the same query touches only detection partitions and project_code no longer exists.">
+  <defs>
+    <marker id="ar2" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
+      <path d="M0,1 L9,5 L0,9 z" fill="currentColor"/>
+    </marker>
+  </defs>
+
+  <!-- CURRENT -->
+  <text x="0" y="16" font-family="IBM Plex Mono, monospace" font-size="11.5" letter-spacing="1.2" fill="#A62B21">CURRENT</text>
+  <line x1="0" y1="26" x2="980" y2="26" stroke="currentColor" stroke-width="1" opacity="0.25"/>
+
+  <rect x="0" y="44" width="132" height="38" fill="none" stroke="currentColor" stroke-width="1.4"/>
+  <text x="66" y="68" text-anchor="middle" font-family="IBM Plex Mono, monospace" font-size="12" fill="currentColor">devicedata</text>
+
+  <line x1="132" y1="63" x2="196" y2="63" stroke="currentColor" stroke-width="1.4" marker-end="url(#ar2)"/>
+  <text x="164" y="54" text-anchor="middle" font-family="IBM Plex Sans, sans-serif" font-size="10.5" fill="currentColor">LIST</text>
+
+  <rect x="200" y="44" width="126" height="38" fill="none" stroke="currentColor" stroke-width="1.4"/>
+  <text x="263" y="61" text-anchor="middle" font-family="IBM Plex Mono, monospace" font-size="11.5" fill="currentColor">project_code</text>
+  <text x="263" y="75" text-anchor="middle" font-family="IBM Plex Sans, sans-serif" font-size="10" fill="currentColor" opacity="0.7">4 customers</text>
+
+  <line x1="326" y1="63" x2="390" y2="63" stroke="currentColor" stroke-width="1.4" marker-end="url(#ar2)"/>
+  <text x="358" y="54" text-anchor="middle" font-family="IBM Plex Sans, sans-serif" font-size="10.5" fill="currentColor">RANGE</text>
+
+  <rect x="394" y="44" width="126" height="38" fill="none" stroke="currentColor" stroke-width="1.4"/>
+  <text x="457" y="61" text-anchor="middle" font-family="IBM Plex Mono, monospace" font-size="11.5" fill="currentColor">times</text>
+  <text x="457" y="75" text-anchor="middle" font-family="IBM Plex Sans, sans-serif" font-size="10" fill="currentColor" opacity="0.7">monthly</text>
+
+  <line x1="520" y1="63" x2="584" y2="63" stroke="currentColor" stroke-width="1.4" marker-end="url(#ar2)"/>
+
+  <rect x="588" y="40" width="392" height="46" fill="#A62B21" opacity="0.14" stroke="#A62B21" stroke-width="1.4"/>
+  <text x="784" y="58" text-anchor="middle" font-family="IBM Plex Sans, sans-serif" font-size="12.5" font-weight="600" fill="currentColor">624,247,424 rows · all 8 shapes mixed</text>
+  <text x="784" y="75" text-anchor="middle" font-family="IBM Plex Sans, sans-serif" font-size="11.5" fill="currentColor">payload shape lives in a nullable int, unindexed</text>
+
+  <text x="0" y="112" font-family="IBM Plex Sans, sans-serif" font-size="12.5" fill="currentColor">A query for one shape must scan every shape in the month. A new customer needs new DDL.</text>
+
+  <!-- TARGET -->
+  <text x="0" y="168" font-family="IBM Plex Mono, monospace" font-size="11.5" letter-spacing="1.2" fill="#0A6478">TARGET</text>
+  <line x1="0" y1="178" x2="980" y2="178" stroke="currentColor" stroke-width="1" opacity="0.25"/>
+
+  <rect x="0" y="196" width="132" height="38" fill="none" stroke="currentColor" stroke-width="1.4"/>
+  <text x="66" y="220" text-anchor="middle" font-family="IBM Plex Mono, monospace" font-size="12" fill="currentColor">devicedata</text>
+
+  <line x1="132" y1="215" x2="196" y2="215" stroke="currentColor" stroke-width="1.4" marker-end="url(#ar2)"/>
+  <text x="164" y="206" text-anchor="middle" font-family="IBM Plex Sans, sans-serif" font-size="10.5" fill="currentColor">LIST</text>
+
+  <rect x="200" y="196" width="126" height="38" fill="#0A6478" opacity="0.16" stroke="#0A6478" stroke-width="1.6"/>
+  <text x="263" y="213" text-anchor="middle" font-family="IBM Plex Mono, monospace" font-size="11.5" fill="currentColor">stream_type</text>
+  <text x="263" y="227" text-anchor="middle" font-family="IBM Plex Sans, sans-serif" font-size="10" fill="currentColor" opacity="0.75">8 shapes, fixed</text>
+
+  <line x1="326" y1="215" x2="390" y2="215" stroke="currentColor" stroke-width="1.4" marker-end="url(#ar2)"/>
+  <text x="358" y="206" text-anchor="middle" font-family="IBM Plex Sans, sans-serif" font-size="10.5" fill="currentColor">RANGE</text>
+
+  <rect x="394" y="196" width="126" height="38" fill="none" stroke="currentColor" stroke-width="1.4"/>
+  <text x="457" y="213" text-anchor="middle" font-family="IBM Plex Mono, monospace" font-size="11.5" fill="currentColor">times</text>
+  <text x="457" y="227" text-anchor="middle" font-family="IBM Plex Sans, sans-serif" font-size="10" fill="currentColor" opacity="0.7">daily</text>
+
+  <line x1="520" y1="215" x2="584" y2="215" stroke="currentColor" stroke-width="1.4" marker-end="url(#ar2)"/>
+
+  <rect x="588" y="192" width="188" height="46" fill="#0A6478" opacity="0.16" stroke="#0A6478" stroke-width="1.4"/>
+  <text x="682" y="210" text-anchor="middle" font-family="IBM Plex Sans, sans-serif" font-size="12" font-weight="600" fill="currentColor">detection · one day</text>
+  <text x="682" y="226" text-anchor="middle" font-family="IBM Plex Sans, sans-serif" font-size="11" fill="currentColor">the only partitions read</text>
+
+  <rect x="788" y="192" width="192" height="46" fill="none" stroke="currentColor" stroke-width="1" stroke-dasharray="4 3" opacity="0.5"/>
+  <text x="884" y="210" text-anchor="middle" font-family="IBM Plex Sans, sans-serif" font-size="12" fill="currentColor" opacity="0.75">7 other shapes</text>
+  <text x="884" y="226" text-anchor="middle" font-family="IBM Plex Sans, sans-serif" font-size="11" fill="currentColor" opacity="0.75">pruned away</text>
+
+  <text x="0" y="264" font-family="IBM Plex Sans, sans-serif" font-size="12.5" fill="currentColor">Shape becomes a physical dimension. <tspan font-weight="600">project_code is deleted</tspan> — one deployment per customer, so a new customer needs no DDL at all.</text>
+
+  <line x1="0" y1="288" x2="980" y2="288" stroke="currentColor" stroke-width="1" opacity="0.2"/>
+  <text x="0" y="312" font-family="IBM Plex Mono, monospace" font-size="11" letter-spacing="1" fill="currentColor" opacity="0.6">ALSO REMOVED</text>
+  <text x="0" y="334" font-family="IBM Plex Sans, sans-serif" font-size="12.5" fill="currentColor">The third <tspan font-family="IBM Plex Mono, monospace" font-size="11.5">LIST(nvaevent_warning)</tspan> level on the projection: a two-value flag that cannot be pruned when queried</text>
+  <text x="0" y="352" font-family="IBM Plex Sans, sans-serif" font-size="12.5" fill="currentColor">with <tspan font-family="IBM Plex Mono, monospace" font-size="11.5">OR</tspan>, and which forces every unique index to include it. A partial index does the same job on 83k rows.</text>
+</svg>
+<figcaption><b>The discriminator every query filters on was missing from the partition key.</b> Flipping the top level from customer to payload shape also removes DDL from customer onboarding, since separate deployments make the tenant column redundant.</figcaption>
+</figure>
+
+<h3 id="entities">Entity schema</h3>
+<figure>
+<div style="overflow-x:auto">
+<svg viewBox="0 0 1180 690" role="img" style="min-width:900px" aria-label="Entity relationship diagram in five bands. Registry: object_type to object to device, with device_type classifying device. Capability and type bindings: device_preset and device_feature hang off device; device_type_feature, device_type_stream and device_type_command hang off device_type; feature is referenced by device_feature and device_type_feature and declares which stream type it emits. Manifest: stream_type owns stream_field which owns stream_field_label; lookup_value decodes coded values. Ingest and serving: stream_type is the list partition key of devicedata, which the projection worker reads into stream_detection, four further stream tables, and device_state; device_preset supplies lane attribution to stream_detection. Audit, workflow and archive: device_feature_history logs feature toggles, detection_workflow holds mutable review state one to one with stream_detection with no foreign key, archive_batch and projection_checkpoint track the pipeline, and command_batch fans out to stream_command.">
+  <defs>
+    <marker id="e-ar" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="6.5" markerHeight="6.5" orient="auto-start-reverse">
+      <path d="M0,1 L9,5 L0,9 z" fill="currentColor"/>
+    </marker>
+    <marker id="e-ar-a" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="6.5" markerHeight="6.5" orient="auto-start-reverse">
+      <path d="M0,1 L9,5 L0,9 z" fill="#0A6478"/>
+    </marker>
+  </defs>
+
+  <!-- band grounds -->
+  <rect x="0" y="38"  width="1180" height="68"  fill="currentColor" opacity="0.035"/>
+  <rect x="0" y="126" width="1180" height="100" fill="currentColor" opacity="0.035"/>
+  <rect x="0" y="252" width="1180" height="100" fill="#0A6478" opacity="0.07"/>
+  <rect x="0" y="378" width="1180" height="112" fill="currentColor" opacity="0.035"/>
+  <rect x="0" y="516" width="1180" height="94"  fill="currentColor" opacity="0.035"/>
+
+  <text x="4" y="30"  font-family="IBM Plex Mono, monospace" font-size="10.5" letter-spacing="1.2" fill="currentColor" opacity="0.62">1 · REGISTRY</text>
+  <text x="4" y="118" font-family="IBM Plex Mono, monospace" font-size="10.5" letter-spacing="1.2" fill="currentColor" opacity="0.62">2 · CAPABILITY &amp; TYPE BINDINGS</text>
+  <text x="4" y="244" font-family="IBM Plex Mono, monospace" font-size="10.5" letter-spacing="1.2" fill="#0A6478">3 · MANIFEST — the load-bearing layer</text>
+  <text x="4" y="370" font-family="IBM Plex Mono, monospace" font-size="10.5" letter-spacing="1.2" fill="currentColor" opacity="0.62">4 · INGEST &amp; SERVING</text>
+  <text x="4" y="508" font-family="IBM Plex Mono, monospace" font-size="10.5" letter-spacing="1.2" fill="currentColor" opacity="0.62">5 · AUDIT, WORKFLOW &amp; ARCHIVE</text>
+
+  <!-- ===== band 1 ===== -->
+  <g font-family="IBM Plex Mono, monospace" font-size="11" fill="currentColor">
+    <rect x="20"  y="50" width="124" height="44" fill="none" stroke="currentColor" stroke-width="1.3"/>
+    <text x="82"  y="77" text-anchor="middle">object_type</text>
+    <rect x="184" y="50" width="124" height="44" fill="none" stroke="currentColor" stroke-width="1.3"/>
+    <text x="246" y="70" text-anchor="middle">object</text>
+    <text x="246" y="85" text-anchor="middle" font-size="9" opacity="0.7">geometry · the map</text>
+    <rect x="348" y="50" width="124" height="44" fill="none" stroke="currentColor" stroke-width="1.8"/>
+    <text x="410" y="70" text-anchor="middle" font-size="11.5">device</text>
+    <text x="410" y="85" text-anchor="middle" font-size="9" opacity="0.7">config jsonb</text>
+    <rect x="512" y="50" width="124" height="44" fill="none" stroke="currentColor" stroke-width="1.8"/>
+    <text x="574" y="70" text-anchor="middle" font-size="11.5">device_type</text>
+    <text x="574" y="85" text-anchor="middle" font-size="9" opacity="0.7">ui_panel</text>
+  </g>
+  <line x1="144" y1="72" x2="180" y2="72" stroke="currentColor" stroke-width="1.2" marker-end="url(#e-ar)"/>
+  <line x1="308" y1="72" x2="344" y2="72" stroke="currentColor" stroke-width="1.2" marker-end="url(#e-ar)"/>
+  <line x1="512" y1="72" x2="476" y2="72" stroke="currentColor" stroke-width="1.2" marker-end="url(#e-ar)"/>
+  <g font-family="IBM Plex Sans, sans-serif" font-size="9" fill="currentColor" opacity="0.8" text-anchor="middle">
+    <text x="162" y="66">1:N</text><text x="326" y="66">1:N</text><text x="494" y="66">1:N</text>
+  </g>
+
+  <!-- ===== band 2 ===== -->
+  <g font-family="IBM Plex Mono, monospace" font-size="11" fill="currentColor">
+    <rect x="20"  y="140" width="160" height="44" fill="none" stroke="currentColor" stroke-width="1.3"/>
+    <text x="100" y="160" text-anchor="middle">device_preset</text>
+    <text x="100" y="175" text-anchor="middle" font-size="9" opacity="0.7">calibrated zone · lane</text>
+    <rect x="200" y="140" width="140" height="44" fill="none" stroke="currentColor" stroke-width="1.3"/>
+    <text x="270" y="160" text-anchor="middle">device_feature</text>
+    <text x="270" y="175" text-anchor="middle" font-size="9" opacity="0.7">is_enabled</text>
+    <rect x="380" y="140" width="176" height="44" fill="none" stroke="currentColor" stroke-width="1.3"/>
+    <text x="468" y="167" text-anchor="middle">device_type_feature</text>
+    <rect x="580" y="140" width="176" height="44" fill="none" stroke="#0A6478" stroke-width="1.5"/>
+    <text x="668" y="160" text-anchor="middle">device_type_stream</text>
+    <text x="668" y="175" text-anchor="middle" font-size="9" opacity="0.7">source_root</text>
+    <rect x="780" y="140" width="184" height="44" fill="#0A6478" fill-opacity="0.07" stroke="#0A6478" stroke-width="1.5"/>
+    <text x="872" y="160" text-anchor="middle">device_type_command</text>
+    <text x="872" y="175" text-anchor="middle" font-size="9" opacity="0.7">what it accepts</text>
+    <rect x="988" y="140" width="140" height="44" fill="none" stroke="currentColor" stroke-width="1.8"/>
+    <text x="1058" y="160" text-anchor="middle" font-size="11.5">feature</text>
+    <text x="1058" y="175" text-anchor="middle" font-size="9" opacity="0.7">is_enforcement</text>
+  </g>
+  <!-- device bus -->
+  <line x1="410" y1="94" x2="410" y2="112" stroke="currentColor" stroke-width="1.2"/>
+  <line x1="100" y1="112" x2="410" y2="112" stroke="currentColor" stroke-width="1.2"/>
+  <line x1="100" y1="112" x2="100" y2="140" stroke="currentColor" stroke-width="1.2" marker-end="url(#e-ar)"/>
+  <line x1="270" y1="112" x2="270" y2="140" stroke="currentColor" stroke-width="1.2" marker-end="url(#e-ar)"/>
+  <text x="330" y="108" font-family="IBM Plex Sans, sans-serif" font-size="9" fill="currentColor" opacity="0.8">1:N per unit</text>
+  <!-- device_type bus -->
+  <line x1="574" y1="94" x2="574" y2="120" stroke="currentColor" stroke-width="1.2"/>
+  <line x1="468" y1="120" x2="872" y2="120" stroke="currentColor" stroke-width="1.2"/>
+  <line x1="468" y1="120" x2="468" y2="140" stroke="currentColor" stroke-width="1.2" marker-end="url(#e-ar)"/>
+  <line x1="668" y1="120" x2="668" y2="140" stroke="currentColor" stroke-width="1.2" marker-end="url(#e-ar)"/>
+  <line x1="872" y1="120" x2="872" y2="140" stroke="currentColor" stroke-width="1.2" marker-end="url(#e-ar)"/>
+  <text x="760" y="116" font-family="IBM Plex Sans, sans-serif" font-size="9" fill="currentColor" opacity="0.8">declares · M:N</text>
+  <!-- feature bus -->
+  <line x1="1058" y1="184" x2="1058" y2="216" stroke="currentColor" stroke-width="1.2"/>
+  <line x1="270"  y1="216" x2="1058" y2="216" stroke="currentColor" stroke-width="1.2"/>
+  <line x1="468"  y1="216" x2="468"  y2="184" stroke="currentColor" stroke-width="1.2" marker-end="url(#e-ar)"/>
+  <line x1="290"  y1="216" x2="290"  y2="184" stroke="currentColor" stroke-width="1.2" marker-end="url(#e-ar)"/>
+  <text x="660" y="211" font-family="IBM Plex Sans, sans-serif" font-size="9" fill="currentColor" opacity="0.8" text-anchor="middle">a feature is what a device actually does — not its type (D32)</text>
+  <!-- device_feature to history -->
+  <line x1="240" y1="184" x2="240" y2="196" stroke="currentColor" stroke-width="1.2"/>
+  <line x1="8"   y1="196" x2="240" y2="196" stroke="currentColor" stroke-width="1.2"/>
+  <line x1="8"   y1="196" x2="8"   y2="556" stroke="currentColor" stroke-width="1.2"/>
+  <line x1="8"   y1="556" x2="20"  y2="556" stroke="currentColor" stroke-width="1.2" marker-end="url(#e-ar)"/>
+  <text x="96" y="192" font-family="IBM Plex Sans, sans-serif" font-size="9" fill="currentColor" opacity="0.8">every toggle logged</text>
+
+  <!-- ===== band 3 ===== -->
+  <g font-family="IBM Plex Mono, monospace" font-size="11" fill="currentColor">
+    <rect x="144" y="266" width="176" height="44" fill="#0A6478" fill-opacity="0.07" stroke="#0A6478" stroke-width="1.5"/>
+    <text x="232" y="286" text-anchor="middle">stream_field_label</text>
+    <text x="232" y="301" text-anchor="middle" font-size="9" opacity="0.7">vi · en</text>
+    <rect x="344" y="266" width="160" height="44" fill="#0A6478" fill-opacity="0.07" stroke="#0A6478" stroke-width="1.5"/>
+    <text x="424" y="286" text-anchor="middle">lookup_value</text>
+    <text x="424" y="301" text-anchor="middle" font-size="9" opacity="0.7">coded + labelled</text>
+    <rect x="544" y="266" width="160" height="44" fill="#0A6478" fill-opacity="0.14" stroke="#0A6478" stroke-width="2"/>
+    <text x="624" y="286" text-anchor="middle" font-size="11.5">stream_field</text>
+    <text x="624" y="301" text-anchor="middle" font-size="9" opacity="0.8">source_path · type · unit</text>
+    <rect x="744" y="266" width="160" height="44" fill="#0A6478" fill-opacity="0.14" stroke="#0A6478" stroke-width="2"/>
+    <text x="824" y="286" text-anchor="middle" font-size="11.5">stream_type</text>
+    <text x="824" y="301" text-anchor="middle" font-size="9" opacity="0.8">grain · retention</text>
+  </g>
+  <line x1="744" y1="288" x2="708" y2="288" stroke="#0A6478" stroke-width="1.4" marker-end="url(#e-ar-a)"/>
+  <text x="726" y="282" font-family="IBM Plex Sans, sans-serif" font-size="9" fill="#0A6478" text-anchor="middle">1:N</text>
+  <line x1="600" y1="266" x2="600" y2="248" stroke="#0A6478" stroke-width="1.4"/>
+  <line x1="232" y1="248" x2="600" y2="248" stroke="#0A6478" stroke-width="1.4"/>
+  <line x1="232" y1="248" x2="232" y2="266" stroke="#0A6478" stroke-width="1.4" marker-end="url(#e-ar-a)"/>
+  <text x="416" y="243" font-family="IBM Plex Sans, sans-serif" font-size="9" fill="#0A6478" text-anchor="middle">retires devices_vietsub_mapping + infotype</text>
+  <!-- device_type_stream down to stream_type -->
+  <line x1="700" y1="184" x2="700" y2="236" stroke="#0A6478" stroke-width="1.4"/>
+  <line x1="700" y1="236" x2="790" y2="236" stroke="#0A6478" stroke-width="1.4"/>
+  <line x1="790" y1="236" x2="790" y2="266" stroke="#0A6478" stroke-width="1.4" marker-end="url(#e-ar-a)"/>
+  <!-- feature emits stream_type -->
+  <line x1="1100" y1="184" x2="1100" y2="236" stroke="#0A6478" stroke-width="1.4"/>
+  <line x1="880"  y1="236" x2="1100" y2="236" stroke="#0A6478" stroke-width="1.4"/>
+  <line x1="880"  y1="236" x2="880"  y2="266" stroke="#0A6478" stroke-width="1.4" marker-end="url(#e-ar-a)"/>
+  <text x="990" y="231" font-family="IBM Plex Sans, sans-serif" font-size="9" fill="#0A6478" text-anchor="middle">emits</text>
+
+  <!-- ===== band 4 ===== -->
+  <g font-family="IBM Plex Mono, monospace" font-size="11" fill="currentColor">
+    <rect x="20"  y="392" width="160" height="52" fill="none" stroke="currentColor" stroke-width="1.3"/>
+    <text x="100" y="414" text-anchor="middle">device_state</text>
+    <text x="100" y="429" text-anchor="middle" font-size="9" opacity="0.7">1 row per device</text>
+    <text x="100" y="440" text-anchor="middle" font-size="9" opacity="0.7">what the map polls</text>
+    <rect x="344" y="392" width="160" height="52" fill="none" stroke="currentColor" stroke-width="1.8"/>
+    <text x="424" y="414" text-anchor="middle" font-size="11.5">stream_detection</text>
+    <text x="424" y="429" text-anchor="middle" font-size="9" opacity="0.7">typed columns · int[]</text>
+    <text x="424" y="440" text-anchor="middle" font-size="9" opacity="0.7">76% of all rows</text>
+    <rect x="544" y="392" width="176" height="52" fill="none" stroke="currentColor" stroke-width="1.3"/>
+    <text x="632" y="414" text-anchor="middle">4 more stream tables</text>
+    <text x="632" y="429" text-anchor="middle" font-size="9" opacity="0.7">measurement · position</text>
+    <text x="632" y="440" text-anchor="middle" font-size="9" opacity="0.7">health · opstate</text>
+    <rect x="764" y="392" width="140" height="52" fill="none" stroke="currentColor" stroke-width="1.8"/>
+    <text x="834" y="414" text-anchor="middle" font-size="11.5">devicedata</text>
+    <text x="834" y="429" text-anchor="middle" font-size="9" opacity="0.7">append-only JSONB</text>
+    <text x="834" y="440" text-anchor="middle" font-size="9" opacity="0.7">no triggers</text>
+    <rect x="944" y="392" width="176" height="52" fill="none" stroke="currentColor" stroke-width="1.3"/>
+    <text x="1032" y="414" text-anchor="middle">stream_command</text>
+    <text x="1032" y="429" text-anchor="middle" font-size="9" opacity="0.7">ack ≠ verified (D28)</text>
+  </g>
+  <line x1="834" y1="310" x2="834" y2="392" stroke="#0A6478" stroke-width="1.6" marker-end="url(#e-ar-a)"/>
+  <text x="842" y="352" font-family="IBM Plex Sans, sans-serif" font-size="9" fill="#0A6478">LIST partition key</text>
+  <line x1="424" y1="310" x2="424" y2="392" stroke="#0A6478" stroke-width="1.4" marker-end="url(#e-ar-a)"/>
+  <text x="432" y="352" font-family="IBM Plex Sans, sans-serif" font-size="9" fill="#0A6478">decodes</text>
+  <line x1="764" y1="418" x2="728" y2="418" stroke="currentColor" stroke-width="1.2" marker-end="url(#e-ar)"/>
+  <!-- devicedata to stream_detection -->
+  <line x1="770" y1="444" x2="770" y2="478" stroke="currentColor" stroke-width="1.2"/>
+  <line x1="470" y1="478" x2="770" y2="478" stroke="currentColor" stroke-width="1.2"/>
+  <line x1="470" y1="478" x2="470" y2="444" stroke="currentColor" stroke-width="1.2" marker-end="url(#e-ar)"/>
+  <text x="620" y="473" font-family="IBM Plex Sans, sans-serif" font-size="9" fill="currentColor" opacity="0.85" text-anchor="middle">projection worker · keyset cursor on id, idempotent upsert</text>
+  <!-- preset edges -->
+  <line x1="60" y1="184" x2="60" y2="392" stroke="currentColor" stroke-width="1.2" marker-end="url(#e-ar)"/>
+  <text x="66" y="300" font-family="IBM Plex Sans, sans-serif" font-size="9" fill="currentColor" opacity="0.8">1:1 active</text>
+  <line x1="140" y1="184" x2="140" y2="364" stroke="currentColor" stroke-width="1.2"/>
+  <line x1="140" y1="364" x2="386" y2="364" stroke="currentColor" stroke-width="1.2"/>
+  <line x1="386" y1="364" x2="386" y2="392" stroke="currentColor" stroke-width="1.2" marker-end="url(#e-ar)"/>
+  <text x="264" y="359" font-family="IBM Plex Sans, sans-serif" font-size="9" fill="currentColor" opacity="0.85" text-anchor="middle">authoritative lane attribution (D35/D37)</text>
+
+  <!-- ===== band 5 ===== -->
+  <g font-family="IBM Plex Mono, monospace" font-size="11" fill="currentColor">
+    <rect x="20"  y="534" width="176" height="44" fill="none" stroke="currentColor" stroke-width="1.3"/>
+    <text x="108" y="554" text-anchor="middle">device_feature_history</text>
+    <text x="108" y="569" text-anchor="middle" font-size="9" opacity="0.7">evidentiary · never pruned</text>
+    <rect x="344" y="534" width="176" height="44" fill="none" stroke="currentColor" stroke-width="1.3"/>
+    <text x="432" y="554" text-anchor="middle">detection_workflow</text>
+    <text x="432" y="569" text-anchor="middle" font-size="9" opacity="0.7">mutable · ~1M rows/yr</text>
+    <rect x="560" y="534" width="176" height="44" fill="none" stroke="currentColor" stroke-width="1.3"/>
+    <text x="648" y="554" text-anchor="middle">archive_batch</text>
+    <text x="648" y="569" text-anchor="middle" font-size="9" opacity="0.7">Parquet interlock</text>
+    <rect x="764" y="534" width="176" height="44" fill="none" stroke="currentColor" stroke-width="1.3"/>
+    <text x="852" y="554" text-anchor="middle">projection_checkpoint</text>
+    <text x="852" y="569" text-anchor="middle" font-size="9" opacity="0.7">cursor per stream</text>
+    <rect x="944" y="534" width="176" height="44" fill="none" stroke="currentColor" stroke-width="1.3"/>
+    <text x="1032" y="554" text-anchor="middle">command_batch</text>
+    <text x="1032" y="569" text-anchor="middle" font-size="9" opacity="0.7">one operator decision</text>
+  </g>
+  <line x1="370" y1="444" x2="370" y2="534" stroke="currentColor" stroke-width="1.2" marker-end="url(#e-ar)"/>
+  <text x="378" y="500" font-family="IBM Plex Sans, sans-serif" font-size="9" fill="currentColor" opacity="0.85">1:1 · no FK, by choice (D25)</text>
+  <line x1="800" y1="444" x2="800" y2="504" stroke="currentColor" stroke-width="1.2"/>
+  <line x1="648" y1="504" x2="800" y2="504" stroke="currentColor" stroke-width="1.2"/>
+  <line x1="648" y1="504" x2="648" y2="534" stroke="currentColor" stroke-width="1.2" marker-end="url(#e-ar)"/>
+  <text x="700" y="499" font-family="IBM Plex Sans, sans-serif" font-size="9" fill="currentColor" opacity="0.85" text-anchor="middle">aged rows</text>
+  <line x1="870" y1="444" x2="870" y2="534" stroke="currentColor" stroke-width="1.2" marker-end="url(#e-ar)"/>
+  <line x1="1032" y1="534" x2="1032" y2="444" stroke="currentColor" stroke-width="1.2" marker-end="url(#e-ar)"/>
+  <text x="1040" y="500" font-family="IBM Plex Sans, sans-serif" font-size="9" fill="currentColor" opacity="0.85">1:N fan-out</text>
+
+  <!-- footer notes -->
+  <line x1="0" y1="632" x2="1180" y2="632" stroke="currentColor" stroke-width="1" opacity="0.2"/>
+  <text x="0" y="650" font-family="IBM Plex Sans, sans-serif" font-size="10.5" fill="currentColor" opacity="0.75">Every table in bands 4 and 5 carries <tspan font-family="IBM Plex Mono, monospace" font-size="10">device_id → device</tspan>; those edges are omitted to keep the drawing legible. Teal marks the manifest and the paths it drives.</text>
+  <text x="0" y="668" font-family="IBM Plex Sans, sans-serif" font-size="10.5" fill="currentColor" opacity="0.75">Gone from the current schema: <tspan font-family="IBM Plex Mono, monospace" font-size="10">project_code</tspan>, the tenant-mapping tables, <tspan font-family="IBM Plex Mono, monospace" font-size="10">datatype</tspan>, duplicated coordinate columns, and both row-level triggers.</text>
+</svg>
+</div>
+<figcaption><b>Two hubs, one manifest.</b> <code>device_type</code> declares what a model can do; <code>device</code> plus its enabled <code>feature</code> rows declare what a unit actually does — which is what determines the streams it emits. The teal band is the manifest: <code>stream_type</code> is simultaneously the partition key of the ingest table and the parent of the field declarations that generate every projection column. <code>device_preset</code> is the only path by which a detection acquires a defensible lane attribution.</figcaption>
+</figure>
+
+<h3 id="flow">Data flow</h3>
+<figure>
+<svg viewBox="0 0 980 480" role="img" aria-label="Data flow: devices send messages to the gateway, which fans one message out into several stream rows written to an append-only JSONB table; a projection worker reads that table with a keyset cursor and writes typed projection tables plus a device_state row; the trajectory blob bypasses Postgres entirely and goes to a Parquet archive on the NAS, which DuckDB reads in-process for the API.">
+  <defs>
+    <marker id="ar3" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
+      <path d="M0,1 L9,5 L0,9 z" fill="currentColor"/>
+    </marker>
+    <marker id="ar3a" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
+      <path d="M0,1 L9,5 L0,9 z" fill="#0A6478"/>
+    </marker>
+  </defs>
+
+  <!-- devices -->
+  <rect x="0" y="26" width="150" height="66" fill="none" stroke="currentColor" stroke-width="1.4"/>
+  <text x="75" y="50" text-anchor="middle" font-family="IBM Plex Sans, sans-serif" font-size="12.5" font-weight="600" fill="currentColor">IoT devices</text>
+  <text x="75" y="66" text-anchor="middle" font-family="IBM Plex Sans, sans-serif" font-size="11" fill="currentColor" opacity="0.75">LPR · GPS · sensors</text>
+  <text x="75" y="81" text-anchor="middle" font-family="IBM Plex Sans, sans-serif" font-size="11" fill="currentColor" opacity="0.75">controllers</text>
+
+  <line x1="150" y1="59" x2="212" y2="59" stroke="currentColor" stroke-width="1.4" marker-end="url(#ar3)"/>
+
+  <!-- gateway / fanout -->
+  <rect x="216" y="26" width="164" height="66" fill="none" stroke="currentColor" stroke-width="1.4"/>
+  <text x="298" y="50" text-anchor="middle" font-family="IBM Plex Sans, sans-serif" font-size="12.5" font-weight="600" fill="currentColor">Gateway · fan-out</text>
+  <text x="298" y="67" text-anchor="middle" font-family="IBM Plex Sans, sans-serif" font-size="11" fill="currentColor" opacity="0.75">one message →</text>
+  <text x="298" y="82" text-anchor="middle" font-family="IBM Plex Sans, sans-serif" font-size="11" fill="currentColor" opacity="0.75">N stream rows</text>
+
+  <line x1="380" y1="59" x2="446" y2="59" stroke="currentColor" stroke-width="1.4" marker-end="url(#ar3)"/>
+  <text x="413" y="50" text-anchor="middle" font-family="IBM Plex Sans, sans-serif" font-size="10.5" fill="currentColor">writes</text>
+
+  <!-- raw -->
+  <rect x="450" y="26" width="196" height="66" fill="#0A6478" opacity="0.1" stroke="#0A6478" stroke-width="1.5"/>
+  <text x="548" y="48" text-anchor="middle" font-family="IBM Plex Mono, monospace" font-size="12" fill="currentColor">devicedata</text>
+  <text x="548" y="65" text-anchor="middle" font-family="IBM Plex Sans, sans-serif" font-size="11" fill="currentColor" opacity="0.8">append-only JSONB</text>
+  <text x="548" y="80" text-anchor="middle" font-family="IBM Plex Sans, sans-serif" font-size="11" fill="currentColor" opacity="0.8">no triggers, ever</text>
+
+  <!-- track bypass -->
+  <path d="M298 92 L298 128 L862 128 L862 300" fill="none" stroke="#A62B21" stroke-width="1.6" stroke-dasharray="6 4" marker-end="url(#ar3)"/>
+  <text x="560" y="121" text-anchor="middle" font-family="IBM Plex Sans, sans-serif" font-size="11.5" font-weight="600" fill="#A62B21">trajectory blob bypasses Postgres entirely — 48% of the payload</text>
+
+  <line x1="548" y1="92" x2="548" y2="164" stroke="currentColor" stroke-width="1.4" marker-end="url(#ar3)"/>
+  <text x="558" y="130" font-family="IBM Plex Sans, sans-serif" font-size="10.5" fill="currentColor">keyset cursor on id</text>
+  <text x="558" y="146" font-family="IBM Plex Sans, sans-serif" font-size="10.5" fill="currentColor">xmin visibility guard</text>
+
+  <!-- worker -->
+  <rect x="450" y="168" width="196" height="58" fill="none" stroke="currentColor" stroke-width="1.6"/>
+  <text x="548" y="190" text-anchor="middle" font-family="IBM Plex Sans, sans-serif" font-size="12.5" font-weight="600" fill="currentColor">Projection worker</text>
+  <text x="548" y="207" text-anchor="middle" font-family="IBM Plex Sans, sans-serif" font-size="11" fill="currentColor" opacity="0.75">idempotent upsert</text>
+  <text x="548" y="220" text-anchor="middle" font-family="IBM Plex Sans, sans-serif" font-size="11" fill="currentColor" opacity="0.75">tail + backfill, one binary</text>
+
+  <!-- manifest -->
+  <rect x="0" y="168" width="196" height="58" fill="none" stroke="#0A6478" stroke-width="1.6" stroke-dasharray="5 3"/>
+  <text x="98" y="190" text-anchor="middle" font-family="IBM Plex Mono, monospace" font-size="12" fill="#0A6478">stream_field</text>
+  <text x="98" y="207" text-anchor="middle" font-family="IBM Plex Sans, sans-serif" font-size="11" fill="currentColor" opacity="0.8">the manifest</text>
+  <text x="98" y="220" text-anchor="middle" font-family="IBM Plex Sans, sans-serif" font-size="11" fill="currentColor" opacity="0.8">git → migration → table</text>
+  <line x1="196" y1="197" x2="446" y2="197" stroke="#0A6478" stroke-width="1.5" stroke-dasharray="5 3" marker-end="url(#ar3a)"/>
+  <text x="321" y="189" text-anchor="middle" font-family="IBM Plex Sans, sans-serif" font-size="10.5" fill="#0A6478">parses, generates DDL, indexes</text>
+
+  <!-- projections -->
+  <line x1="548" y1="226" x2="548" y2="266" stroke="currentColor" stroke-width="1.4" marker-end="url(#ar3)"/>
+
+  <rect x="216" y="270" width="150" height="34" fill="none" stroke="currentColor" stroke-width="1.2"/>
+  <text x="291" y="292" text-anchor="middle" font-family="IBM Plex Mono, monospace" font-size="11.5" fill="currentColor">stream_detection</text>
+  <rect x="216" y="310" width="150" height="34" fill="none" stroke="currentColor" stroke-width="1.2"/>
+  <text x="291" y="332" text-anchor="middle" font-family="IBM Plex Mono, monospace" font-size="11.5" fill="currentColor">stream_position</text>
+  <rect x="216" y="350" width="150" height="34" fill="none" stroke="currentColor" stroke-width="1.2"/>
+  <text x="291" y="372" text-anchor="middle" font-family="IBM Plex Mono, monospace" font-size="11.5" fill="currentColor">+ 4 more shapes</text>
+
+  <rect x="392" y="270" width="150" height="34" fill="none" stroke="currentColor" stroke-width="1.2"/>
+  <text x="467" y="292" text-anchor="middle" font-family="IBM Plex Mono, monospace" font-size="11.5" fill="currentColor">device_state</text>
+  <text x="467" y="318" text-anchor="middle" font-family="IBM Plex Sans, sans-serif" font-size="11" fill="currentColor" opacity="0.75">one row per device</text>
+  <text x="467" y="333" text-anchor="middle" font-family="IBM Plex Sans, sans-serif" font-size="11" fill="currentColor" opacity="0.75">what the map reads</text>
+
+  <path d="M500 266 L366 287" fill="none" stroke="currentColor" stroke-width="1.2" marker-end="url(#ar3)"/>
+  <path d="M540 266 L500 287" fill="none" stroke="currentColor" stroke-width="1.2" marker-end="url(#ar3)"/>
+
+  <!-- workflow -->
+  <rect x="392" y="350" width="150" height="34" fill="none" stroke="currentColor" stroke-width="1.2"/>
+  <text x="467" y="372" text-anchor="middle" font-family="IBM Plex Mono, monospace" font-size="11" fill="currentColor">detection_workflow</text>
+  <line x1="291" y1="304" x2="291" y2="310" stroke="currentColor" stroke-width="1"/>
+  <path d="M366 287 L392 360" fill="none" stroke="currentColor" stroke-width="1.2" stroke-dasharray="4 3" marker-end="url(#ar3)"/>
+  <text x="330" y="404" text-anchor="middle" font-family="IBM Plex Sans, sans-serif" font-size="11" fill="currentColor" opacity="0.75">mutable review state, ~83k rows/month</text>
+
+  <!-- archive -->
+  <rect x="770" y="270" width="184" height="58" fill="none" stroke="currentColor" stroke-width="1.5"/>
+  <text x="862" y="292" text-anchor="middle" font-family="IBM Plex Sans, sans-serif" font-size="12.5" font-weight="600" fill="currentColor">Parquet on NAS</text>
+  <text x="862" y="309" text-anchor="middle" font-family="IBM Plex Sans, sans-serif" font-size="11" fill="currentColor" opacity="0.75">3-year history</text>
+  <text x="862" y="322" text-anchor="middle" font-family="IBM Plex Sans, sans-serif" font-size="11" fill="currentColor" opacity="0.75">no second server</text>
+
+  <path d="M646 59 L940 59 L940 262" fill="none" stroke="currentColor" stroke-width="1.3" marker-end="url(#ar3)"/>
+  <text x="936" y="150" text-anchor="end" font-family="IBM Plex Sans, sans-serif" font-size="10.5" fill="currentColor">past retention</text>
+  <path d="M366 287 L762 287" fill="none" stroke="currentColor" stroke-width="1.3" stroke-dasharray="4 3" marker-end="url(#ar3)"/>
+  <text x="640" y="280" text-anchor="middle" font-family="IBM Plex Sans, sans-serif" font-size="10.5" fill="currentColor">aged projections</text>
+
+  <!-- api -->
+  <rect x="770" y="352" width="184" height="44" fill="none" stroke="currentColor" stroke-width="1.4"/>
+  <text x="862" y="379" text-anchor="middle" font-family="IBM Plex Sans, sans-serif" font-size="12.5" font-weight="600" fill="currentColor">API + frontend</text>
+  <line x1="862" y1="328" x2="862" y2="348" stroke="currentColor" stroke-width="1.3" marker-end="url(#ar3)"/>
+  <text x="872" y="343" font-family="IBM Plex Sans, sans-serif" font-size="10.5" fill="currentColor">DuckDB, in-process</text>
+  <path d="M98 226 L98 440 L862 440 L862 400" fill="none" stroke="#0A6478" stroke-width="1.5" stroke-dasharray="5 3" marker-end="url(#ar3a)"/>
+  <text x="480" y="433" text-anchor="middle" font-family="IBM Plex Sans, sans-serif" font-size="11" fill="#0A6478">same manifest generates the panel, table, filters and labels</text>
+
+  <line x1="0" y1="462" x2="980" y2="462" stroke="currentColor" stroke-width="1" opacity="0.2"/>
+  <text x="0" y="476" font-family="IBM Plex Sans, sans-serif" font-size="11" fill="currentColor" opacity="0.7">Solid: data. Dashed teal: the manifest. Dashed red: the path that never enters Postgres.</text>
+</svg>
+<figcaption><b>The manifest sits on both sides of the worker.</b> It parses the incoming payload and generates the projection DDL, and the same declaration drives the API's filter whitelist and the frontend's generated panel — which is what makes a new device type a config change rather than a release.</figcaption>
+</figure>
+
+<h3 id="manifest">What one field declaration drives</h3>
+<figure>
+<svg viewBox="0 0 980 262" role="img" aria-label="A single stream_field row fans out to five consumers: ingest parsing and validation, projection DDL and index creation, the API filter whitelist, the generated frontend panel, and the Vietnamese and English labels.">
+  <defs>
+    <marker id="ar4" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
+      <path d="M0,1 L9,5 L0,9 z" fill="#0A6478"/>
+    </marker>
+  </defs>
+  <rect x="0" y="74" width="230" height="112" fill="#0A6478" opacity="0.12" stroke="#0A6478" stroke-width="1.6"/>
+  <text x="115" y="100" text-anchor="middle" font-family="IBM Plex Mono, monospace" font-size="13" fill="currentColor">stream_field</text>
+  <text x="16" y="122" font-family="IBM Plex Mono, monospace" font-size="10.5" fill="currentColor" opacity="0.85">field_key · source_path</text>
+  <text x="16" y="138" font-family="IBM Plex Mono, monospace" font-size="10.5" fill="currentColor" opacity="0.85">data_type · unit</text>
+  <text x="16" y="154" font-family="IBM Plex Mono, monospace" font-size="10.5" fill="currentColor" opacity="0.85">null_sentinel · collection</text>
+  <text x="16" y="170" font-family="IBM Plex Mono, monospace" font-size="10.5" fill="currentColor" opacity="0.85">is_filterable · is_evidence</text>
+
+  <line x1="230" y1="130" x2="286" y2="130" stroke="#0A6478" stroke-width="1.6"/>
+  <line x1="286" y1="26" x2="286" y2="234" stroke="#0A6478" stroke-width="1.6"/>
+
+  <line x1="286" y1="26" x2="346" y2="26" stroke="#0A6478" stroke-width="1.6" marker-end="url(#ar4)"/>
+  <line x1="286" y1="78" x2="346" y2="78" stroke="#0A6478" stroke-width="1.6" marker-end="url(#ar4)"/>
+  <line x1="286" y1="130" x2="346" y2="130" stroke="#0A6478" stroke-width="1.6" marker-end="url(#ar4)"/>
+  <line x1="286" y1="182" x2="346" y2="182" stroke="#0A6478" stroke-width="1.6" marker-end="url(#ar4)"/>
+  <line x1="286" y1="234" x2="346" y2="234" stroke="#0A6478" stroke-width="1.6" marker-end="url(#ar4)"/>
+
+  <text x="356" y="22" font-family="IBM Plex Sans, sans-serif" font-size="13" font-weight="600" fill="currentColor">Ingest parsing &amp; validation</text>
+  <text x="356" y="38" font-family="IBM Plex Sans, sans-serif" font-size="11.5" fill="currentColor" opacity="0.75">locates the value in three incompatible envelopes; coerces "-1" and "" to NULL</text>
+
+  <text x="356" y="74" font-family="IBM Plex Sans, sans-serif" font-size="13" font-weight="600" fill="currentColor">Projection DDL &amp; indexes</text>
+  <text x="356" y="90" font-family="IBM Plex Sans, sans-serif" font-size="11.5" fill="currentColor" opacity="0.75">column type, array vs blob handling, which fields get an index</text>
+
+  <text x="356" y="126" font-family="IBM Plex Sans, sans-serif" font-size="13" font-weight="600" fill="currentColor">API filter whitelist</text>
+  <text x="356" y="142" font-family="IBM Plex Sans, sans-serif" font-size="11.5" fill="currentColor" opacity="0.75">only declared-filterable fields are queryable — no unbounded scans by accident</text>
+
+  <text x="356" y="178" font-family="IBM Plex Sans, sans-serif" font-size="13" font-weight="600" fill="currentColor">Generated frontend panel</text>
+  <text x="356" y="194" font-family="IBM Plex Sans, sans-serif" font-size="11.5" fill="currentColor" opacity="0.75">detail panel, history table, filter bar — workflow screens opt out</text>
+
+  <text x="356" y="230" font-family="IBM Plex Sans, sans-serif" font-size="13" font-weight="600" fill="currentColor">Vietnamese &amp; English labels</text>
+  <text x="356" y="246" font-family="IBM Plex Sans, sans-serif" font-size="11.5" fill="currentColor" opacity="0.75">retires devices_vietsub_mapping and infotype</text>
+</svg>
+<figcaption><b>Five consumers, one declaration.</b> Authored as a file in git and applied by migration, so anything touching storage is reviewed; materialised into a table the API and frontend read at runtime, so anything cosmetic is config.</figcaption>
+</figure>
+</div>
+
+<div class="wrap">
+<h3 id="layers">Layer walkthrough</h3>
+
+<h4>Layer 1 — Registry</h4>
+<p>Small, typed, foreign-key enforced. <code>object</code> is the sited thing that appears on the map and owns the single authoritative <code>geometry(Point,4326)</code>; <code>device</code> is the hardware at that object; <code>device_type</code> is the model. Everything the map draws comes from here, so the map query never touches telemetry. Per-device configuration currently repeated in every event — <code>nva_url_lan</code>, <code>nva_network</code>, the camera description — moves into <code>device.config</code> and is joined.</p>
+<p>Capability sits one level down. <code>device_type_feature</code> declares what a model <em>can</em> do; <code>device_feature</code> records what a specific unit has <em>enabled</em>; and <code>device_feature_history</code> is append-only, because if LPR was switched off for three hours then "no violations occurred" and "detection was disabled" produce identical data. That distinction is a question a defence lawyer asks.</p>
+
+<h4>Layer 2 — Ingest</h4>
+<p><code>devicedata</code> remains an append-only JSONB log, partitioned <code>stream_type → day</code>. No triggers: the write path does nothing but write. The JSONB is kept as the audit and reprocessing payload for the stream's configured retention window, then archived. The trajectory blob never enters this table — the gateway routes it straight to the archive.</p>
+
+<h4>Layer 3 — Serving</h4>
+<p>One typed table per stream, columns generated from the manifest, each partitioned at a grain matched to its rate. These are what every user-facing query reads: <code>error_bitmask</code> is a real <code>int[]</code> with a GIN index, <code>plate</code> is a real <code>text</code> column with a real btree, and no <code>datajson-&gt;&gt;</code> appears on the read path. <code>device_state</code> holds exactly one row per device with its latest reading — what the map and the dashboard poll — replacing the per-ping <code>UPDATE public.object</code> and taking that contention off the table the map reads from.</p>
+
+<h4>Layer 3b — Mutable workflow</h4>
+<p><code>detection_workflow</code> is small by nature: violations are 0.018% of detections, so roughly a million rows a year. It holds review status, reviewing officer, download and sync state, priority and notes — resolving a real contradiction in the current design, where eleven mutable fields live inside an append-only table that cannot be updated at scale.</p>
+
+<h4>Layer 4 — Archive</h4>
+<p>Beyond each stream's hot window, rows are written once to Parquet on the NAS that already exists for video, and read back in-process by DuckDB embedded in the backend. Three domains live there: aged raw JSONB for reprocessing after a manifest change, aged projections for multi-year plate search, and the trajectory tracks, which are archive-only from the moment they arrive.</p>
+
+<div class="note">
+<h4>Why no second database server</h4>
+<p>ClickHouse would compress this data best and query it fastest. It was rejected because <strong>customers run their own on-prem deployments and CadPro does not host them</strong>. A second engine means per-site backup, DR, monitoring, upgrades and procurement, debugged remotely at sites the team cannot see, under a three-year support contract. DuckDB is a library, not a server: MIT-licensed, no daemon, no port, nothing for customer IT to operate. Timescale compression (whose licence conditions redistribution on the customer being barred from modifying the schema) and Citus columnar (AGPL) both need legal review and are unnecessary if this holds.</p>
+</div>
+
+</div>
+
+<div class="wide">
+<h3 id="moving">Moving objects — how position reaches the map</h3>
+<p style="max-width:74ch">A vehicle is a <strong>movable object type</strong>. The bus or fleet vehicle is the <code>object</code>; the GPS unit is a <code>device</code> attached to it; and the object's location comes from GPS rather than from a survey. The payload confirms the separation is real — <code>Dev.dev_sh</code> is a licence plate (<code>50E-854.78</code>), so the vehicle keeps its identity, route assignments and history when the tracker is swapped.</p>
+<p style="max-width:74ch">Positions arrive <strong>every 5 seconds</strong>, which makes this a high-volume stream rather than a minor one:</p>
+
+<div class="tw"><table>
+<thead><tr><th>Fleet size</th><th class="num">Mobile devices</th><th class="num">Pings/day</th><th class="num">Rows/month</th><th class="num"><code>stream_position</code>/month</th><th class="num"><code>device_state</code> upserts/sec</th></tr></thead>
+<tbody>
+<tr><td>Da Nang today — 200 buses + up to 200 fleet</td><td class="num">~400</td><td class="num">6.9M</td><td class="num">207M</td><td class="num">~43 GB</td><td class="num">80</td></tr>
+<tr><td>At 2,000 mobile devices</td><td class="num">2,000</td><td class="num">34.6M</td><td class="num">1.04B</td><td class="num">~218 GB</td><td class="num">400</td></tr>
+</tbody></table></div>
+
+<p style="max-width:74ch">Three consequences follow from the 5-second interval. <strong>First</strong>, <code>stream_position</code> needs <strong>daily</strong> partitions, not the weekly grain in the DDL above — at 2,000 devices a weekly partition would hold 242M rows. <strong>Second</strong>, <code>device_state</code> is a small table taking hundreds of upserts per second, which makes its physical design a requirement rather than a tuning detail. <strong>Third</strong>, the GiST index on <code>stream_position.location</code> becomes the expensive object at this volume — a spatial index over a billion rows a month adds an estimated 60–80 GB/month, so it is worth checking whether geofence and zone queries can be bounded by device and time first and filtered spatially afterwards.</p>
+
+<h4>The path of one GPS ping</h4>
+<p style="max-width:74ch">The bus payload carries two sub-objects, and every value arrives as a string:</p>
+<div class="sql"><div class="cap">Incoming · one message, two streams</div><pre>{ "Dev":    { "dev_sh": "50E-854.78", "cpu_temp": "34.7", "fw_ver": "1.20", ... },
+  "DevMsg": { "gps_lat": "15.948215", "gps_long": "108.220024",
+              "gps_speed": "17.71", "gps_course": "333.02",
+              "gps_sats": 31, "gps_qual": 1, "gps_status": "A", "dev_static": 0 } }</pre></div>
+<ol style="max-width:74ch">
+  <li><strong>The gateway fans it out</strong> (D14): <code>$.DevMsg</code> to the position stream, <code>$.Dev</code> to the health stream. Two rows in <code>devicedata</code> from one message.</li>
+  <li><strong>The manifest turns two fields into one column.</strong> <code>gps_lat</code> and <code>gps_long</code> are separate source paths combining into a single <code>geometry(Point,4326)</code> — a derived field under D18, with the string-to-numeric coercion declared rather than hardcoded.</li>
+  <li><strong>The worker appends to <code>stream_position</code></strong>, idempotent on <code>(times, source_id)</code>. Every fix is recorded, valid or not.</li>
+  <li><strong>The worker upserts <code>device_state</code></strong> — the only write the map sees.</li>
+</ol>
+
+<div class="sql"><div class="cap">The upsert that moves the marker</div><pre>INSERT INTO device_state AS ds (device_id, last_seen_at, location, speed_kph, online)
+VALUES ($device, $times,
+        ST_SetSRID(ST_MakePoint($long, $lat), 4326),  -- long first; a lat/long swap is the classic bug
+        $speed, true)
+ON CONFLICT (device_id) DO UPDATE
+   SET last_seen_at = EXCLUDED.last_seen_at,
+       location     = EXCLUDED.location,
+       speed_kph    = EXCLUDED.speed_kph,
+       online       = true
+ WHERE ds.last_seen_at &lt; EXCLUDED.last_seen_at;  -- a late packet must not move the marker backwards</pre></div>
+<p style="max-width:74ch">That <code>WHERE</code> clause carries more weight than it looks. The worker cursors on <code>id</code> rather than <code>times</code> precisely so late packets are not lost, which means a fix from ninety seconds ago can arrive after a newer one. Without the guard the vehicle jumps back up the road.</p>
+
+<div class="note crit">
+<h4>⚠ To discuss with the team — this differs from the current implementation</h4>
+<p><strong>Nothing in this subsection is decided.</strong> The current version already implements position updates through a row-level trigger, so these are proposals for review, not agreed changes.</p>
+<p><strong>1 · Live position moves out of <code>object</code>.</strong> Today <code>trg_devicedata_update_object_location</code> issues an <code>UPDATE public.object</code> on every datapoint carrying coordinates. That makes the table the entire map depends on the hottest write target in the system, and <code>object</code> carries a GiST index on <code>location</code>. The proposal splits the write three ways: <code>devicedata</code> for audit, <code>stream_position</code> for history and playback, <code>device_state</code> for the one row per device that the map reads. For a movable object type, <code>object.location</code> then means depot or home base and is never rewritten by telemetry.</p>
+<p><strong>2 · <code>device_state</code> should carry no index but its primary key.</strong> This one is counterintuitive and worth arguing about. A Postgres <code>UPDATE</code> writes a new row version, and HOT updates avoid touching indexes <em>only</em> if no indexed column changed. Every ping changes <code>location</code> and <code>last_seen_at</code>. Index either one and every one of those 400 upserts per second writes new index entries and leaves dead ones — relocating the bloat rather than removing it. On a table of a few thousand narrow rows a sequential scan for "every live vehicle in this viewport" is sub-millisecond and beats an index scan anyway. Paired with <code>fillfactor = 70</code> and per-table aggressive autovacuum, which extends the instinct already present on today's <code>devices</code> table.</p>
+<p><strong>3 · A validity gate on <code>gps_status</code>.</strong> The current trigger fires whenever latitude, longitude and <code>object_id</code> are non-null. It does not check <code>gps_status</code>, where <code>"A"</code> means an active fix and <code>"V"</code> means void. A void reading still carries coordinate fields — often <code>0,0</code> or a stale value — and is written straight to <code>object</code>. Recording every fix in <code>stream_position</code> while advancing <code>device_state</code> only on a valid one means the marker stops moving instead of teleporting, and a stale <code>last_seen_at</code> becomes the offline indicator.</p>
+<p><strong>Also worth a decision:</strong> whether 5-second resolution needs to persist for the full retention window. It is clearly right for driver-behaviour analysis and trip playback, and almost certainly excessive for three-year reporting — thinning to 30- or 60-second resolution on archive would cut the position tier substantially.</p>
+</div>
+
+<h4>Two position sources, derivable rather than special-cased</h4>
+<div class="tw"><table>
+<thead><tr><th>Device is…</th><th>Position comes from</th><th>Updated</th></tr></thead>
+<tbody>
+<tr><td>On a fixed object — camera, controller, environmental unit</td><td><code>object.location</code></td><td>Only when someone physically moves and re-surveys it</td></tr>
+<tr><td>On a movable object — bus, fleet vehicle</td><td><code>device_state.location</code></td><td>Every valid fix, every 5 s</td></tr>
+</tbody></table></div>
+<p style="max-width:74ch">Which one applies needs no special case: a device whose enabled features include <code>gps_track</code> emits the position stream, so it is on a movable object. The feature model already answers it.</p>
+<p style="max-width:74ch">One frontend consequence: <code>course_deg</code> and <code>speed_kph</code> are not decoration. Even at 5-second intervals a marker that only jumps on each ping reads as broken, so the client interpolates along the last known heading at the last known speed and snaps to the real position when it arrives. <code>dev_static</code> matters for the same reason — a parked vehicle should not be animated, and GPS jitter on a stationary bus is what makes markers vibrate.</p>
+</div>
+
+<div class="wrap">
+<h2 id="streams"><span class="n">Section five</span>Stream taxonomy</h2>
+<p>Validated against four real device payloads. Seven shapes are stored; the eighth is archive-only.</p>
+</div>
+
+<div class="wide">
+<div class="tw"><table>
+<thead><tr><th class="num">#</th><th>Code</th><th>Table</th><th>Grain</th><th>Validated by</th></tr></thead>
+<tbody>
+<tr><td class="num">1</td><td><code>measurement</code></td><td><code>stream_measurement</code></td><td>month</td><td>Environmental unit <code>DevMsg</code> — 22 numeric fields spanning air quality, noise, flood level and weather</td></tr>
+<tr><td class="num">2</td><td><code>position</code></td><td><code>stream_position</code></td><td>week</td><td>Bus GPS <code>DevMsg</code></td></tr>
+<tr><td class="num">3</td><td><code>detection</code></td><td><code>stream_detection</code></td><td>week</td><td>LPR <code>nvaevent</code> — <strong>76% of all rows</strong></td></tr>
+<tr><td class="num">4</td><td><code>health</code></td><td><code>stream_health</code></td><td>month</td><td><code>Dev{}</code> envelope in two families <em>and</em> the controller's power/cabinet block — universal across every device type</td></tr>
+<tr><td class="num">5</td><td><code>opstate</code></td><td><code>stream_opstate</code></td><td>month</td><td>Controller phase and aspect block, including the 36-value <code>LightState</code> array</td></tr>
+<tr><td class="num">6</td><td><code>command</code></td><td><code>stream_command</code></td><td>month</td><td><span class="tag t-warn">no sample</span> Designed, not validated. The only stream where the platform writes to a device</td></tr>
+<tr><td class="num">7</td><td><code>rollup</code></td><td><code>stream_rollup</code></td><td>month</td><td>Existing <code>devicedata_agg_json</code></td></tr>
+<tr><td class="num">8</td><td><code>track</code></td><td><em>archive only</em></td><td>—</td><td><code>nvaevent_data</code> — 43 sub-samples per detection</td></tr>
+</tbody></table></div>
+
+<div class="note">
+<h4>Two delimited collections, opposite treatments</h4>
+<p>Both the camera and the controller hide an array inside a string. <code>nvaevent_data</code> is 1,377 bytes of trajectory that nothing ever filters on, so it becomes an archive blob. <code>CtrlData_LightState</code> is 72 bytes of signal aspects that answer "which intersection had conflicting greens at 14:26", so it becomes a <code>smallint[]</code> with a GIN index — not child rows, which would multiply controller telemetry 36×. Same shape, opposite handling, which is why the manifest declares <code>collection_handling</code> explicitly rather than inferring it.</p>
+</div>
+
+<h2 id="decisions"><span class="n">Section six</span>Decisions</h2>
+<h3>Storage &amp; scale</h3>
+<div class="tw"><table>
+<thead><tr><th>ID</th><th>Decision</th><th>Rationale</th></tr></thead>
+<tbody>
+<tr><td class="did">D7</td><td>Retention is a <strong>per-stream-type</strong> property, configurable per site. Detections default to 90 days raw; measurement and position 7; state 30; command 1 year</td><td>90 days of raw for everything is where the storage cost sits. The knob lets a customer who wants longer pay for it</td></tr>
+<tr><td class="did">D8</td><td><strong>Postgres only</strong>, no second database server. Archive is Parquet on the existing NAS read by embedded DuckDB</td><td>On-prem customer deployments make a second engine a support liability, not a performance win</td></tr>
+<tr><td class="did">D9</td><td>Remove the <code>LIST(nvaevent_warning)</code> partition level; partial index instead. Detections partitioned daily (raw) and weekly (projection)</td><td>Measured: the <code>OR</code> on that key costs 324 s, and it forces every unique index to include the flag</td></tr>
+<tr><td class="did">D10</td><td><strong>Single-tenant deployments.</strong> Remove <code>project_code</code> and the entire multi-tenant layer, including the triggers that exist only to protect the tenant column</td><td>A design error, and a live isolation defect. Also removes the column from the PK and five indexes across billions of rows</td></tr>
+<tr><td class="did">D11</td><td><strong>Never rewrite a large table twice.</strong> Combine the <code>project_code</code> removal, the de-partitioning and the stream repartitioning into one rewrite</td><td>Each full rewrite is a multi-hour maintenance window per site</td></tr>
+<tr><td class="did">D12</td><td>The trajectory blob <strong>never enters the hot table</strong> — archive-only from ingest, with a pointer and sample count on the detection row</td><td>48.2% of every detection payload, and nothing filters on it</td></tr>
+<tr><td class="did">D21</td><td><strong><code>bigint</code> identity keys, never UUID</strong>, on high-volume tables</td><td>At 1.75B rows/month bigint lasts millennia; UUID costs 8 bytes/row and destroys btree locality on insert-ordered data</td></tr>
+<tr><td class="did">D22</td><td>Measurement is <strong>one wide sparse table</strong>, not EAV, not per-device-family</td><td>22 environmental fields as EAV means 22 rows per message. NULLs cost ~1 bit; nullable <code>ADD COLUMN</code> is catalog-only</td></tr>
+<tr><td class="did">D38</td><td>Sizing is driven by <strong>enabled-feature counts</strong>, not device counts</td><td>700 cameras does not mean 700 LPR feeds; otherwise every hardware quote is wrong</td></tr>
+</tbody></table></div>
+
+<h3>The manifest</h3>
+<div class="tw"><table>
+<thead><tr><th>ID</th><th>Decision</th><th>Rationale</th></tr></thead>
+<tbody>
+<tr><td class="did">D1</td><td>Version the <strong>stream type</strong>, not the device type</td><td>Hardware revisions become config rows; only genuine shape changes touch storage</td></tr>
+<tr><td class="did">D2</td><td><strong>Backward-compatible, additive-only</strong> within a major version. Rename = add plus <code>deprecated_at</code>; retype or drop = new major</td><td>An in-place rename makes history claim the field always existed. With per-customer deployments there is permanent version skew, so one codebase must serve divergent manifests</td></tr>
+<tr><td class="did">D3</td><td>Stamp <code>manifest_version</code> on <strong>every</strong> projection row</td><td>Otherwise <code>NULL</code> conflates "the sensor did not report" with "the field did not exist yet", and every period-spanning report silently mixes them</td></tr>
+<tr><td class="did">D4</td><td><strong>Additive columns for minor versions; a new table plus a <code>UNION ALL</code> view only for a major bump</strong></td><td>Nullable <code>ADD COLUMN</code> has been catalog-only since PG 11, so the minor path is nearly free</td></tr>
+<tr><td class="did">D6</td><td>Manifest authored as a <strong>git file → migration → table</strong>, structured as shared core plus per-deployment overlay</td><td>Reviewed where it touches storage; config-only for query and UI</td></tr>
+<tr><td class="did">D15</td><td><code>stream_field</code> carries <strong><code>source_path</code> and <code>null_sentinel</code></strong> alongside the canonical <code>field_key</code></td><td>Firmware families disagree on casing (<code>Dev.time</code> vs <code>Dev.Time</code>), and <code>-1</code> and <code>""</code> mean null</td></tr>
+<tr><td class="did">D16</td><td><strong>Event rows carry only what varies per event.</strong> Device attributes join from <code>device.config</code>; labels join from lookup tables</td><td>Another ~10% of every row, and <code>nva_url_lan</code> is stored ~20M times a day</td></tr>
+<tr><td class="did">D17</td><td><code>collection_handling</code> — <code>scalar</code> / <code>array</code> / <code>child_rows</code> / <code>archive_blob</code></td><td>Two payloads embed delimited collections and need opposite treatment; the choice must be declared, not implied by a field name</td></tr>
+<tr><td class="did">D18</td><td><strong>Derived fields</strong> computed by the worker via <code>derived_from</code> and <code>derived_expr</code></td><td>Controller clock drift, speed from position deltas, dwell time. Some of the most valuable columns are not in any payload</td></tr>
+<tr><td class="did">D19</td><td><strong>Health and operational state are separate streams</strong></td><td>Involuntary condition versus intentional output — different retention, consumers and alert rules</td></tr>
+<tr><td class="did">D20</td><td><strong><code>timestamptz</code> everywhere</strong></td><td>The current mix of timestamp types is wrong by seven hours on every cross-comparison</td></tr>
+<tr><td class="did">D26</td><td>The manifest is <strong>bidirectional</strong>: <code>device_type_command</code> declares what a device accepts, mirroring <code>device_type_stream</code></td><td>Keeps "can this device do this?" as config rather than code</td></tr>
+<tr><td class="did">D32</td><td><strong><code>feature</code> is first-class.</strong> The mapping to <code>stream_type</code> hangs off the feature, not the device type <span class="tag t-new">supersedes D14</span></td><td>Two identical cameras with different toggles must be describable without inventing two device types</td></tr>
+</tbody></table></div>
+
+<h3>Pipeline</h3>
+<div class="tw"><table>
+<thead><tr><th>ID</th><th>Decision</th><th>Rationale</th></tr></thead>
+<tbody>
+<tr><td class="did">D5</td><td><strong>External projection worker</strong> in the deployment bundle, surfacing lag on an on-site dashboard. <code>pg_cron</code> only for partition DDL</td><td>No phone-home telemetry is possible; PL/pgSQL is far worse to diagnose at a site the team cannot inspect</td></tr>
+<tr><td class="did">D13</td><td><strong>Mutable state lives in <code>detection_workflow</code></strong>, never in an append-only stream table</td><td>Eleven mutable fields currently sit in a table that cannot be updated at scale</td></tr>
+<tr><td class="did">D14</td><td><span class="super">Ingest fans out: one message → N stream rows</span> — retained, but the mapping level is superseded by D32</td><td>The <code>{Dev, DevMsg}</code> envelope carries health and payload in one message</td></tr>
+<tr><td class="did">D25</td><td><code>detection_workflow</code> uses a <strong>single-column <code>detection_id</code></strong> primary key — no composite key, no FK, no partitioning. Integrity by nightly reconciliation</td><td><strong>Deliberate simplicity trade.</strong> A composite <code>(times, id)</code> key would propagate into every API and frontend call. At ~83k rows/month the table is small enough that reconciliation is trivial. Revisit only if reconciliation ever returns non-zero</td></tr>
+</tbody></table></div>
+
+<h3>Evidence integrity</h3>
+<div class="tw"><table>
+<thead><tr><th>ID</th><th>Decision</th><th>Rationale</th></tr></thead>
+<tbody>
+<tr><td class="did">D23</td><td><strong>AI classification split by purpose, with one declared authority.</strong> Filtered classifiers get typed columns with per-classifier confidence; display-only ones go in <code>ai_features text[]</code>. <code>error_bitmask</code> is authoritative for anything that becomes a fine</td><td>Helmet status currently exists in two encodings. A fine must trace to exactly one field</td></tr>
+<tr><td class="did">D24</td><td><strong>Retire the <code>nvaevent_checkout</code> bit-unpacking</strong></td><td>Hardcoded bit shifts in a trigger are an integration artifact, and a second copy of what the tag array already carries</td></tr>
+<tr><td class="did">D27</td><td>For recurring operations the <strong>auditable unit is the schedule</strong>, not the generated move</td><td>Keeps every row in the command log a human decision. "Why did camera 12 move at 03:00?" is answered by the schedule</td></tr>
+<tr><td class="did">D28</td><td><strong><code>ack</code> and <code>verified</code> are separate</strong>, and verification against observed <code>stream_opstate</code> is mandatory for signal commands</td><td>An ack means "I received the instruction", not "the intersection is running that plan". A command acked but never verified is the alert an engineer needs</td></tr>
+<tr><td class="did">D29</td><td>Commands are absolute and retry-safe, but <code>is_idempotent</code> is <strong>declared per command key</strong></td><td>True today, but a future "extend green by 5 s" would be silently unsafe to retry</td></tr>
+<tr><td class="did">D31</td><td><strong>Two-person approval</strong> for safety-critical intents — signal override, green wave, priority grant</td><td>Standard for infrastructure control; the field stays NULL for low-risk intents</td></tr>
+<tr><td class="did">D33</td><td><code>device_feature_history</code> is <strong>append-only and evidentiary</strong>, and outlives the telemetry retention schedule</td><td>Its whole value is explaining gaps in data that has already been archived</td></tr>
+<tr><td class="did">D34</td><td><strong>Feature toggles are dispatched as commands</strong>, inheriting the approval and audit path. Toggling an enforcement feature is safety-critical</td><td>Turning off city enforcement should not be a silent settings change</td></tr>
+<tr><td class="did">D35</td><td><strong>Enforcement geometry belongs to the (device, preset) pair</strong> — calibrated position, ground zone, lane attribution <span class="tag t-new">supersedes D30</span></td><td>Turns PTZ from a hazard into a capability: one camera legitimately enforcing several approaches, each separately calibrated</td></tr>
+<tr><td class="did">D36</td><td>A detection is <code>geometry_unverified</code> when the device <strong>was not at a calibrated preset</strong> — not merely because a PTZ command occurred</td><td>A camera that panned away and returned produces valid evidence again; a blanket flag would condemn it forever</td></tr>
+<tr><td class="did">D37</td><td><strong><code>lane</code> is stored twice with declared authority</strong>: the device's report as audit, <code>preset_id</code> as authoritative. A mismatch is an alert</td><td>If the camera says "Lane R" while the active preset covers eastbound, something is miscalibrated and no fine should issue</td></tr>
+</tbody></table></div>
+</div>
+
+<div class="wrap">
+<h2 id="ddl"><span class="n">Section seven</span>Full DDL</h2>
+<p>PostgreSQL 16, one deployment per customer. Partition children are created by a generator driven by <code>stream_type.partition_grain</code> rather than a third-party extension, so nothing extra needs packaging for each on-prem site.</p>
+</div>
+
+<div class="wide">
+<h3 id="ddl-registry">Registry</h3>
+<div class="sql"><div class="cap">Layer 1 · object, device, device_type</div><pre>CREATE TABLE object_type (
+    id          int  GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
+    code        text NOT NULL UNIQUE,
+    name        text NOT NULL,
+    created_at  timestamptz NOT NULL DEFAULT now(),
+    deleted_at  timestamptz
+);
+
+-- The sited thing that appears on the map. Single authoritative geometry.
+CREATE TABLE object (
+    id              bigint GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
+    code            text   NOT NULL UNIQUE,
+    name            text,
+    object_type_id  int    NOT NULL REFERENCES object_type(id),
+    organization_id int    REFERENCES organization(id),
+    location        geometry(Point, 4326) NOT NULL,
+    status          smallint NOT NULL DEFAULT 1,
+    attrs           jsonb  NOT NULL DEFAULT '{}',
+    created_at      timestamptz NOT NULL DEFAULT now(),
+    updated_at      timestamptz,
+    deleted_at      timestamptz
+);
+CREATE INDEX object_location_gix ON object USING gist (location);
+CREATE INDEX object_live_ix      ON object (object_type_id, id) WHERE deleted_at IS NULL;
+
+CREATE TABLE device_type (
+    id          int  GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
+    code        text NOT NULL UNIQUE,            -- 'lpr_camera','bus_gps','env_multi','signal_ctrl'
+    name        text NOT NULL,
+    icon_id     int  REFERENCES icon(id),
+    ui_panel    text NOT NULL DEFAULT 'generic', -- 'generic' = auto-generated; else a hand-built key
+    created_at  timestamptz NOT NULL DEFAULT now(),
+    deleted_at  timestamptz
+);
+
+CREATE TABLE device (
+    id             bigint GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
+    code           text   NOT NULL UNIQUE,       -- 'QS1N007'
+    name           text,
+    serial         text,
+    device_type_id int    NOT NULL REFERENCES device_type(id),
+    object_id      bigint NOT NULL REFERENCES object(id),
+    -- per-device config today duplicated into every event (D16):
+    -- nva_url_lan, nva_url_wan, nva_network, camnva_description, controller id, lane label
+    config         jsonb  NOT NULL DEFAULT '{}',
+    status         smallint NOT NULL DEFAULT 1,
+    last_seen_at   timestamptz,
+    created_at     timestamptz NOT NULL DEFAULT now(),
+    updated_at     timestamptz,
+    deleted_at     timestamptz
+);
+CREATE INDEX device_object_type_ix ON device (object_id, device_type_id) WHERE deleted_at IS NULL;
+CREATE INDEX device_type_ix        ON device (device_type_id) WHERE deleted_at IS NULL;</pre></div>
+
+<h3 id="ddl-features">Features &amp; presets</h3>
+<div class="sql"><div class="cap">Layer 1 · capability, toggles, calibrated camera positions</div><pre>-- A toggleable capability. Some features emit a stream; some (PTZ) only accept commands.
+CREATE TABLE feature (
+    id                   int  GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
+    code                 text NOT NULL UNIQUE,   -- 'lpr','traffic_count','security_rec',
+                                                 -- 'ptz','env_sense','gps_track'
+    name                 text NOT NULL,
+    emits_stream_type_id int  REFERENCES stream_type(id),  -- NULL = command-only feature
+    is_enforcement       boolean NOT NULL DEFAULT false,   -- gates the approval path (D34)
+    map_layer            text,                   -- which map layer this puts the device on
+    created_at           timestamptz NOT NULL DEFAULT now()
+);
+
+-- What this hardware model CAN do.
+CREATE TABLE device_type_feature (
+    device_type_id int NOT NULL REFERENCES device_type(id),
+    feature_id     int NOT NULL REFERENCES feature(id),
+    PRIMARY KEY (device_type_id, feature_id)
+);
+
+-- What THIS unit currently has enabled. (D32)
+CREATE TABLE device_feature (
+    device_id   bigint  NOT NULL REFERENCES device(id),
+    feature_id  int     NOT NULL REFERENCES feature(id),
+    is_enabled  boolean NOT NULL DEFAULT false,
+    config      jsonb   NOT NULL DEFAULT '{}',
+    changed_at  timestamptz NOT NULL DEFAULT now(),
+    changed_by  int,
+    PRIMARY KEY (device_id, feature_id)
+);
+CREATE INDEX ON device_feature (feature_id) WHERE is_enabled;
+
+-- Append-only. Evidentiary. Never pruned with telemetry retention. (D33)
+CREATE TABLE device_feature_history (
+    id         bigint GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
+    device_id  bigint  NOT NULL REFERENCES device(id),
+    feature_id int     NOT NULL REFERENCES feature(id),
+    is_enabled boolean NOT NULL,
+    valid_from timestamptz NOT NULL,
+    valid_to   timestamptz,              -- NULL = still in effect
+    changed_by int,
+    command_id bigint,                   -- the stream_command that did it (D34)
+    reason     text
+);
+CREATE INDEX ON device_feature_history (device_id, feature_id, valid_from DESC);
+CREATE INDEX ON device_feature_history (feature_id, valid_from DESC) WHERE valid_to IS NULL;
+
+-- Calibrated camera positions and the ground geometry each one enforces. (D35)
+CREATE TABLE device_preset (
+    id               bigint GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
+    device_id        bigint NOT NULL REFERENCES device(id),
+    preset_no        smallint NOT NULL,          -- the camera's own preset index
+    name             text,
+    pan              numeric(6,2),
+    tilt             numeric(6,2),
+    zoom             numeric(6,2),
+    enforcement_zone geometry(Polygon, 4326),    -- what this view actually covers
+    lane_label       text,                       -- authoritative for attribution (D37)
+    approach         text,                       -- 'northbound','eastbound'
+    is_calibrated    boolean NOT NULL DEFAULT false,
+    calibrated_at    timestamptz,
+    calibrated_by    int,
+    deleted_at       timestamptz,
+    UNIQUE (device_id, preset_no)
+);
+CREATE INDEX ON device_preset USING gist (enforcement_zone);
+CREATE INDEX ON device_preset (device_id) WHERE is_calibrated AND deleted_at IS NULL;</pre></div>
+
+<h3 id="ddl-manifest">Manifest</h3>
+<div class="sql"><div class="cap">The load-bearing entity · stream_type, stream_field, lookups</div><pre>CREATE TABLE stream_type (
+    id                  int  GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
+    code                text NOT NULL UNIQUE,
+    name                text NOT NULL,
+    storage_table       text,                    -- NULL for 'track' (archive only)
+    partition_grain     text NOT NULL DEFAULT 'month'
+                          CHECK (partition_grain IN ('day','week','month')),
+    hot_in_postgres     boolean NOT NULL DEFAULT true,
+    raw_retention_days  int NOT NULL DEFAULT 30,  -- D7, per-site configurable
+    proj_retention_days int NOT NULL DEFAULT 365
+);
+
+-- M:N. One message can feed several streams (D14), keyed off features (D32).
+CREATE TABLE device_type_stream (
+    device_type_id int  NOT NULL REFERENCES device_type(id),
+    stream_type_id int  NOT NULL REFERENCES stream_type(id),
+    source_root    text NOT NULL DEFAULT '$',    -- '$', '$.Dev', '$.DevMsg'
+    PRIMARY KEY (device_type_id, stream_type_id)
+);
+
+CREATE TABLE stream_field (
+    id                  bigint GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
+    stream_type_id      int  NOT NULL REFERENCES stream_type(id),
+    device_type_id      int  REFERENCES device_type(id),   -- NULL = all device types
+    field_key           text NOT NULL,          -- canonical, immutable
+    column_name         text NOT NULL,          -- physical column in storage_table
+    source_path         text,                   -- JSON pointer; NULL for derived (D18)
+    data_type           text NOT NULL
+        CHECK (data_type IN ('int','bigint','numeric','text','bool','timestamptz','time',
+                             'geometry','int_array','smallint_array','text_array','jsonb')),
+    unit                text,
+    null_sentinel       text[],                 -- D15: {'-1',''} -> NULL
+    collection_handling text NOT NULL DEFAULT 'scalar'     -- D17
+        CHECK (collection_handling IN ('scalar','array','child_rows','archive_blob')),
+    collection_delim    text,
+    collection_len      int,
+    derived_from        text[],                 -- D18
+    derived_expr        text,
+    is_indexed          boolean NOT NULL DEFAULT false,
+    is_filterable       boolean NOT NULL DEFAULT false,     -- API whitelist; decides D23 placement
+    is_evidence         boolean NOT NULL DEFAULT false,     -- D23: may be cited in a fine
+    added_in_version    smallint NOT NULL,
+    deprecated_at       timestamptz,            -- never DELETE (D2)
+    UNIQUE (stream_type_id, device_type_id, field_key),
+    CHECK (source_path IS NOT NULL OR derived_expr IS NOT NULL)
+);
+
+CREATE TABLE stream_field_label (               -- retires devices_vietsub_mapping + infotype
+    stream_field_id bigint NOT NULL REFERENCES stream_field(id) ON DELETE CASCADE,
+    locale          text   NOT NULL,            -- 'vi','en'
+    label           text   NOT NULL,
+    description     text,
+    PRIMARY KEY (stream_field_id, locale)
+);
+
+-- Coded values today denormalised as labels into every event
+CREATE TABLE lookup_value (
+    id      bigint GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
+    domain  text NOT NULL,   -- 'vehicle_type','vehicle_colour','vehicle_brand',
+                             -- 'violation','signal_aspect'
+    code    text NOT NULL,
+    sort    int  NOT NULL DEFAULT 0,
+    UNIQUE (domain, code)
+);
+CREATE TABLE lookup_value_label (
+    lookup_value_id bigint NOT NULL REFERENCES lookup_value(id) ON DELETE CASCADE,
+    locale          text   NOT NULL,
+    label           text   NOT NULL,
+    label_short     text,
+    PRIMARY KEY (lookup_value_id, locale)
+);
+
+CREATE TABLE manifest_migration (               -- D6: applied git manifest versions
+    version     smallint PRIMARY KEY,
+    applied_at  timestamptz NOT NULL DEFAULT now(),
+    git_sha     text NOT NULL,
+    notes       text
+);</pre></div>
+
+<h3 id="ddl-ingest">Ingest</h3>
+<div class="sql"><div class="cap">Layer 2 · append-only, no triggers</div><pre>CREATE TABLE devicedata (
+    id               bigint GENERATED BY DEFAULT AS IDENTITY,
+    device_id        bigint NOT NULL,            -- FK omitted: hot path, validated at ingest
+    stream_type_id   int    NOT NULL,
+    times            timestamptz NOT NULL,       -- event time from the payload
+    ingested_at      timestamptz NOT NULL DEFAULT now(),
+    manifest_version smallint NOT NULL,
+    datajson         jsonb NOT NULL,             -- audit payload, minus the track blob (D12)
+    PRIMARY KEY (stream_type_id, times, id)
+) PARTITION BY LIST (stream_type_id);
+
+CREATE TABLE devicedata_detection PARTITION OF devicedata
+    FOR VALUES IN (3) PARTITION BY RANGE (times);
+CREATE TABLE devicedata_detection_2026_09_03 PARTITION OF devicedata_detection
+    FOR VALUES FROM ('2026-09-03') TO ('2026-09-04');
+-- children created by our own generator from stream_type.partition_grain
+
+CREATE INDEX ON devicedata (id);                 -- worker cursor
+CREATE INDEX ON devicedata (device_id, times DESC);</pre></div>
+
+<h3 id="ddl-serving">Serving</h3>
+<div class="sql"><div class="cap">Layer 3 · stream_detection — the 76% stream</div><pre>CREATE TABLE stream_detection (
+    id                bigint GENERATED BY DEFAULT AS IDENTITY,
+    times             timestamptz NOT NULL,
+    device_id         bigint NOT NULL REFERENCES device(id),
+    source_id         bigint NOT NULL,           -- devicedata.id, for idempotency
+    manifest_version  smallint NOT NULL,         -- D3
+
+    -- identity / measurement
+    plate             text,
+    vehicle_type_id   bigint REFERENCES lookup_value(id),
+    speed_kph         int,
+    avg_speed_kph     numeric(5,2),
+    weight_kg         int,
+    car_length_m      numeric(5,2),
+    car_width_m       numeric(5,2),
+    car_height_m      numeric(5,2),
+    direction         smallint,
+    lane              text,                      -- as reported: audit only (D37)
+    preset_id         bigint REFERENCES device_preset(id),   -- authoritative (D35)
+    red_light_s       int,
+
+    -- AI classification: filterable -> typed columns with confidence (D23)
+    vehicle_colour_id bigint REFERENCES lookup_value(id),
+    vehicle_brand_id  bigint REFERENCES lookup_value(id),
+    plate_colour_id   bigint REFERENCES lookup_value(id),
+    helmet_state      smallint,                  -- 0 none, 1 worn, NULL n/a
+    seatbelt_state    smallint,
+    phone_use_state   smallint,
+    conf_plate        smallint,                  -- 0-100
+    conf_vehicle      smallint,
+    conf_classifier   smallint,
+    -- AI classification: display-only -> tag array (D23)
+    ai_features       text[] NOT NULL DEFAULT '{}',
+
+    -- violations: AUTHORITATIVE for fines (D23)
+    error_bitmask     int[] NOT NULL DEFAULT '{}',
+
+    -- evidence integrity
+    geometry_unverified boolean NOT NULL DEFAULT false,      -- D36
+    lane_mismatch       boolean NOT NULL DEFAULT false,      -- D37
+
+    -- evidence
+    bbox              numeric[],                 -- normalised 0..1, resolution-independent
+    image_ref         text,
+    video_ref         text,
+    track_archive_ref text,                      -- D12: pointer; blob lives in Parquet
+    track_samples     int,
+
+    PRIMARY KEY (times, id),
+    UNIQUE (times, source_id)
+) PARTITION BY RANGE (times);
+
+CREATE INDEX ON stream_detection (plate, times DESC) WHERE plate IS NOT NULL AND plate &lt;&gt; '';
+CREATE INDEX ON stream_detection USING gin (error_bitmask);
+CREATE INDEX ON stream_detection USING gin (ai_features);
+CREATE INDEX ON stream_detection (device_id, times DESC);
+-- replaces the LIST(nvaevent_warning) partition level; ~83k entries/month, not 472M
+CREATE INDEX ON stream_detection (times DESC) WHERE error_bitmask &lt;&gt; '{}';
+CREATE INDEX ON stream_detection (times DESC) WHERE helmet_state = 0;
+CREATE INDEX ON stream_detection (times DESC) WHERE geometry_unverified OR lane_mismatch;</pre></div>
+
+<div class="sql"><div class="cap">Layer 3 · stream_opstate — signal phase and plan</div><pre>CREATE TABLE stream_opstate (
+    id               bigint GENERATED BY DEFAULT AS IDENTITY,
+    times            timestamptz NOT NULL,
+    device_id        bigint NOT NULL REFERENCES device(id),
+    source_id        bigint NOT NULL,
+    manifest_version smallint NOT NULL,
+    light_state      smallint[],                 -- 36 aspects; collection_handling='array'
+    active_phase     smallint,
+    phase_timer_s    smallint,
+    phase_length_s   smallint,
+    period_phase     smallint,
+    period_timer_s   smallint,
+    period_length_s  smallint,
+    ctrl_state       smallint,
+    ctrl_event       smallint,
+    special_state    smallint,
+    strategy_id      int,
+    strategy_phase   smallint,
+    strategy_start   time,
+    strategy_next    time,
+    box_time         time,                       -- the cabinet's own clock
+    clock_drift_s    int,                        -- D18 derived: |times - box_time|
+    PRIMARY KEY (times, id),
+    UNIQUE (times, source_id)
+) PARTITION BY RANGE (times);
+
+CREATE INDEX ON stream_opstate (device_id, times DESC);
+CREATE INDEX ON stream_opstate USING gin (light_state);
+CREATE INDEX ON stream_opstate (times DESC) WHERE clock_drift_s &gt; 5;   -- green-wave alert</pre></div>
+
+<div class="sql"><div class="cap">Layer 3 · stream_health — universal, deliberately sparse</div><pre>CREATE TABLE stream_health (
+    id               bigint GENERATED BY DEFAULT AS IDENTITY,
+    times            timestamptz NOT NULL,
+    device_id        bigint NOT NULL REFERENCES device(id),
+    source_id        bigint NOT NULL,
+    manifest_version smallint NOT NULL,
+    cpu_temp_c       numeric(4,1),
+    uptime_s         bigint,
+    fw_version       text,
+    ip_eth           inet,
+    ip_wifi          inet,
+    volt_src         numeric(5,2),
+    volt_bat         numeric(5,2),
+    ampe_bat         numeric(5,2),
+    temp_charge      numeric(4,1),
+    ac_state         smallint,
+    ac1_state        smallint,
+    ac2_state        smallint,
+    door_state       smallint,                   -- cabinet door: a security event if wired
+    gps_state        text,
+    err_code         int,
+    err_param        int[],
+    PRIMARY KEY (times, id),
+    UNIQUE (times, source_id)
+) PARTITION BY RANGE (times);
+
+CREATE INDEX ON stream_health (device_id, times DESC);
+CREATE INDEX ON stream_health (times DESC) WHERE err_code &lt;&gt; 0 OR door_state = 1;</pre></div>
+
+<div class="sql"><div class="cap">Layer 3 · stream_measurement — one wide sparse table (D22)</div><pre>CREATE TABLE stream_measurement (
+    id               bigint GENERATED BY DEFAULT AS IDENTITY,
+    times            timestamptz NOT NULL,
+    device_id        bigint NOT NULL REFERENCES device(id),
+    source_id        bigint NOT NULL,
+    manifest_version smallint NOT NULL,
+    temp_c           numeric(4,1),
+    temp_sa_c        numeric(4,1),
+    humidity_pct     numeric(4,1),
+    pressure_hpa     numeric(6,1),
+    aqi              int,
+    iaq              int,
+    iaq_ac           smallint,
+    co2_ppm          int,
+    voc              int,
+    pm1_0            int,
+    pm2_5            int,
+    pm10             int,
+    noise_dba        numeric(4,1),
+    noise_dbc        numeric(4,1),
+    noise_dbz        numeric(4,1),
+    dist_mm          int,
+    dist_filtered_mm int,
+    water_level_mm   int,
+    flood_level      smallint,
+    traffic_volume   int,                        -- traffic cameras land here too
+    fuel_pct         numeric(4,1),
+    PRIMARY KEY (times, id),
+    UNIQUE (times, source_id)
+) PARTITION BY RANGE (times);
+
+CREATE INDEX ON stream_measurement (device_id, times DESC);
+CREATE INDEX ON stream_measurement (times DESC) WHERE flood_level &gt; 0;</pre></div>
+
+<div class="sql"><div class="cap">Layer 3 · stream_position, and device_state — what the map reads</div><pre>CREATE TABLE stream_position (
+    id               bigint GENERATED BY DEFAULT AS IDENTITY,
+    times            timestamptz NOT NULL,
+    device_id        bigint NOT NULL REFERENCES device(id),
+    source_id        bigint NOT NULL,
+    manifest_version smallint NOT NULL,
+    location         geometry(Point, 4326) NOT NULL,
+    altitude_m       numeric(6,2),
+    speed_kph        numeric(5,2),
+    course_deg       numeric(5,2),
+    gps_quality      smallint,
+    gps_sats         smallint,
+    gps_status       text,
+    is_static        boolean,
+    PRIMARY KEY (times, id),
+    UNIQUE (times, source_id)
+) PARTITION BY RANGE (times);
+
+CREATE INDEX ON stream_position (device_id, times DESC);
+CREATE INDEX ON stream_position USING gist (location);
+
+-- Exactly one row per device. Replaces the per-ping UPDATE public.object.
+CREATE TABLE device_state (
+    device_id        bigint PRIMARY KEY REFERENCES device(id),
+    last_seen_at     timestamptz NOT NULL,
+    location         geometry(Point, 4326),      -- mobile devices only
+    speed_kph        numeric(5,2),
+    online           boolean NOT NULL DEFAULT true,
+    alert_level      smallint NOT NULL DEFAULT 0,
+    active_preset_id bigint REFERENCES device_preset(id),
+    at_calibrated    boolean NOT NULL DEFAULT true,
+    preset_source    text,                       -- 'onvif_readback' | 'last_commanded'
+    latest           jsonb NOT NULL DEFAULT '{}' -- manifest-selected headline fields
+) WITH (fillfactor = 70);                        -- HOT updates: rewritten constantly
+
+CREATE INDEX ON device_state USING gist (location);
+CREATE INDEX ON device_state (online, last_seen_at DESC);</pre></div>
+
+<div class="sql"><div class="cap">Layer 3b · detection_workflow — mutable review state (D25)</div><pre>-- Small by nature: violations are 0.018% of detections, so ~1M rows/year.
+-- Single-column key, no FK, no partitioning: a deliberate simplicity choice.
+CREATE TABLE detection_workflow (
+    detection_id    bigint PRIMARY KEY,
+    detection_times timestamptz NOT NULL,        -- NOT part of the key.
+                                                 -- Partition-pruning hint for the join back
+                                                 -- to stream_detection. Always carry it.
+    review_status   smallint NOT NULL DEFAULT 0, -- 0 pending 1 approved 2 rejected 3 escalated
+    reviewed_by     int,
+    reviewed_at     timestamptz,
+    review_notes    text,
+    fine_amount_vnd bigint,
+    download_state  smallint,
+    sync_state      smallint,
+    on_server       boolean,
+    priority        smallint,
+    updated_at      timestamptz NOT NULL DEFAULT now()
+);
+
+CREATE INDEX ON detection_workflow (review_status, detection_times DESC)
+    WHERE review_status = 0;     -- the officer's pending queue, and nothing else
+CREATE INDEX ON detection_workflow (detection_times DESC);</pre></div>
+
+<h3 id="ddl-command">Command &amp; control</h3>
+<div class="sql"><div class="cap">Stream 6 · the only stream that writes to infrastructure</div><pre>-- What a device type ACCEPTS. The mirror of device_type_stream. (D26)
+CREATE TABLE device_type_command (
+    device_type_id   int  NOT NULL REFERENCES device_type(id),
+    command_key      text NOT NULL,          -- 'set_plan','set_green','priority_grant',
+                                             -- 'signboard_push','ptz_goto_preset','ptz_zoom'
+    transport        text NOT NULL           -- the gateway abstracts these
+                       CHECK (transport IN ('gateway','onvif','http')),
+    params_schema    jsonb NOT NULL DEFAULT '{}',   -- validated before dispatch
+    is_idempotent    boolean NOT NULL DEFAULT true, -- D29
+    expects_ack      boolean NOT NULL DEFAULT false,
+    ack_timeout_s    int,
+    verify_rule      text,                   -- D28, e.g. 'opstate.strategy_id = params.plan_id'
+    risk_class       text NOT NULL DEFAULT 'low'
+                       CHECK (risk_class IN ('low','safety_critical')),
+    changes_geometry boolean NOT NULL DEFAULT false,
+    PRIMARY KEY (device_type_id, command_key)
+);
+
+-- One operator decision, targeting one or many devices.
+CREATE TABLE command_batch (
+    id             bigint GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
+    intent         text NOT NULL,           -- 'green_wave_activate','signal_override',
+                                            -- 'priority_grant','signboard_push','ptz_move'
+    apply_policy   text NOT NULL DEFAULT 'all_or_nothing'
+                     CHECK (apply_policy IN ('all_or_nothing','best_effort')),
+    issued_by      int  NOT NULL,
+    issued_at      timestamptz NOT NULL DEFAULT now(),
+    approved_by    int,                     -- D31: required when risk_class='safety_critical'
+    approved_at    timestamptz,
+    expires_at     timestamptz,             -- a late priority grant is dangerous
+    reason         text NOT NULL,
+    schedule_id    bigint,                  -- set when generated from a schedule (D27)
+    rejected_at    timestamptz,
+    reject_reason  text,
+    rolled_back_at timestamptz,
+    CHECK (approved_by IS NULL OR approved_at IS NOT NULL)
+);
+CREATE INDEX ON command_batch (issued_at DESC);
+CREATE INDEX ON command_batch (intent, issued_at DESC);
+
+-- One instruction to one device.
+CREATE TABLE stream_command (
+    id             bigint GENERATED BY DEFAULT AS IDENTITY,
+    times          timestamptz NOT NULL,    -- dispatch time
+    batch_id       bigint NOT NULL REFERENCES command_batch(id),
+    device_id      bigint NOT NULL REFERENCES device(id),
+    command_key    text   NOT NULL,
+    params         jsonb  NOT NULL DEFAULT '{}',
+    dispatch_state smallint NOT NULL DEFAULT 0,   -- 0 queued 1 sent 2 failed 3 expired
+    attempts       smallint NOT NULL DEFAULT 0,
+    ack_state      smallint,                -- explicit device acknowledgement, if any
+    ack_at         timestamptz,
+    ack_detail     text,
+    verified_at    timestamptz,             -- D28: confirmed against observed state
+    verified_by_id bigint,                  -- the stream_opstate.id that confirmed it
+    PRIMARY KEY (times, id)
+) PARTITION BY RANGE (times);
+
+CREATE INDEX ON stream_command (device_id, times DESC);
+CREATE INDEX ON stream_command (batch_id);
+CREATE INDEX ON stream_command (times DESC) WHERE verified_at IS NULL AND ack_state IS NOT NULL;
+CREATE INDEX ON stream_command (times DESC) WHERE dispatch_state = 2;
+
+-- Standing plans. A CHANGE here is the auditable event, not each generated move. (D27)
+CREATE TABLE command_schedule (
+    id          bigint GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
+    device_id   bigint NOT NULL REFERENCES device(id),
+    command_key text   NOT NULL,
+    params      jsonb  NOT NULL DEFAULT '{}',
+    cron_expr   text   NOT NULL,
+    timezone    text   NOT NULL DEFAULT 'Asia/Ho_Chi_Minh',
+    is_active   boolean NOT NULL DEFAULT true,
+    created_by  int    NOT NULL,
+    created_at  timestamptz NOT NULL DEFAULT now(),
+    updated_by  int,
+    updated_at  timestamptz,
+    deleted_at  timestamptz
+);
+CREATE INDEX ON command_schedule (device_id) WHERE deleted_at IS NULL AND is_active;
+
+CREATE TABLE command_schedule_history (
+    id           bigint GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
+    schedule_id  bigint NOT NULL REFERENCES command_schedule(id),
+    changed_by   int    NOT NULL,
+    changed_at   timestamptz NOT NULL DEFAULT now(),
+    change_kind  text   NOT NULL CHECK (change_kind IN ('create','update','disable','delete')),
+    before_state jsonb,
+    after_state  jsonb,
+    reason       text
+);</pre></div>
+
+<h3 id="ddl-pipeline">Pipeline state</h3>
+<div class="sql"><div class="cap">Checkpoints and the archive interlock</div><pre>CREATE TABLE projection_checkpoint (
+    stream_type_id   int PRIMARY KEY REFERENCES stream_type(id),
+    last_source_id   bigint NOT NULL DEFAULT 0,   -- cursor on id, NOT times
+    last_source_time timestamptz,                 -- observability only, never a cursor
+    rows_projected   bigint NOT NULL DEFAULT 0,
+    updated_at       timestamptz NOT NULL DEFAULT now()
+);
+
+CREATE TABLE archive_batch (
+    id                bigint GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
+    stream_type_id    int  NOT NULL REFERENCES stream_type(id),
+    range_start       timestamptz NOT NULL,
+    range_end         timestamptz NOT NULL,
+    parquet_path      text NOT NULL,
+    row_count         bigint NOT NULL,
+    bytes             bigint NOT NULL,
+    checksum          text NOT NULL,
+    written_at        timestamptz NOT NULL DEFAULT now(),
+    source_dropped_at timestamptz    -- set only after the Parquet file is verified
+);</pre></div>
+<p style="max-width:74ch"><code>source_dropped_at</code> is the safety interlock: a hot partition is never dropped until its archive file exists, its row count matches and its checksum verifies.</p>
+
+<h3>The queries this schema exists to make possible</h3>
+<div class="sql"><div class="cap">Evidence trace · was enforcement actually active when this was captured?</div><pre>SELECT d.id, d.times, d.plate, p.lane_label, d.geometry_unverified,
+       h.is_enabled AS lpr_enabled_at_capture
+FROM stream_detection d
+LEFT JOIN device_preset p ON p.id = d.preset_id
+LEFT JOIN device_feature_history h
+       ON h.device_id  = d.device_id
+      AND h.feature_id = (SELECT id FROM feature WHERE code = 'lpr')
+      AND d.times &gt;= h.valid_from
+      AND (h.valid_to IS NULL OR d.times &lt; h.valid_to)
+WHERE d.times = $1 AND d.id = $2;</pre></div>
+
+<div class="sql"><div class="cap">Nightly integrity job · replaces the foreign key D25 gave up</div><pre>-- Orphaned review records: a fine with no detection behind it.
+SELECT w.detection_id, w.detection_times, w.review_status, w.reviewed_by
+FROM detection_workflow w
+LEFT JOIN stream_detection d
+       ON d.id = w.detection_id AND d.times = w.detection_times
+WHERE d.id IS NULL;
+
+-- The reverse: violations with no review record after 24h (a queue leak).
+SELECT d.id, d.times
+FROM stream_detection d
+LEFT JOIN detection_workflow w ON w.detection_id = d.id
+WHERE d.error_bitmask &lt;&gt; '{}'
+  AND d.times BETWEEN now() - interval '7 days' AND now() - interval '24 hours'
+  AND w.detection_id IS NULL;</pre></div>
+
+<div class="note warn">
+<h4>The trap D25 creates</h4>
+<p><code>stream_detection</code> is partitioned by <code>times</code>, so a lookup by <code>id</code> alone <strong>cannot prune</strong> — it scans all 156 partitions at three-year retention. That is the same failure class as the current 324-second query. The single-id API stays, but the backend must always carry <code>detection_times</code> into the join. This has to be a code-review rule, because it will look redundant to whoever writes the next endpoint.</p>
+</div>
+</div>
+
+<div class="wrap">
+<h2 id="worker"><span class="n">Section eight</span>Projection worker rules</h2>
+<p>Non-negotiable. Each one corresponds to a defect found in the current pipeline.</p>
+<ol>
+  <li><strong>Never read to the head of the table.</strong> Guard with <code>xmin &lt; pg_snapshot_xmin(pg_current_snapshot())</code>, or a fixed visibility lag longer than the longest ingest transaction, plus a nightly repair pass over the last 48 hours. Ids commit out of order, so reading to <code>max(id)</code> loses rows permanently and silently.</li>
+  <li><strong>Cursor on <code>id</code>, never on <code>times</code>.</strong> Detections arrive late; a time cursor skips them forever. Bound the read with a recent-time window for partition pruning only, and drop that bound for backfill.</li>
+  <li><strong>Idempotent write</strong> — unique key plus <code>ON CONFLICT DO NOTHING</code>. Note that a unique index on a partitioned table must include every partition key column.</li>
+  <li><strong>The cursor advances in the same transaction as the insert.</strong> Separate them and they will diverge without anyone noticing.</li>
+  <li><strong>Batches of 2,000–10,000</strong>, committed per batch, with a sleep on a short batch. Not 100,000.</li>
+  <li><strong>One binary, two modes</strong> — tail and backfill. No per-customer procedures.</li>
+  <li><strong>Monitor lag and reconcile.</strong> Expose <code>now() - last_source_time</code> and rows behind, alert above five minutes, and reconcile raw against projection counts hourly every night.</li>
+</ol>
+
+<div class="note">
+<h4>Why not CDC or logical decoding</h4>
+<p>Latency is not the constraint at ~230 rows/second average. A replication slot retains WAL until the consumer acknowledges, so a stuck consumer fills the disk — at a site the team cannot see. Slot synchronisation to a promoted standby arrived only in PostgreSQL 17, and this runs 16.14. Decoding a partitioned table also needs <code>publish_via_partition_root = true</code>. The operational risk buys nothing the batch worker does not already deliver.</p>
+</div>
+
+<h2 id="actions"><span class="n">Section nine</span>Immediate actions</h2>
+<p>None of these require the target schema. Ordered by value per hour.</p>
+</div>
+
+<div class="wide">
+<div class="tw"><table>
+<thead><tr><th class="num">#</th><th>Action</th><th>Effort</th><th>Why</th></tr></thead>
+<tbody>
+<tr><td class="num">1</td><td><strong>Remove the optional-parameter <code>OR</code> from the officer-screen query</strong> — emit the <code>nvaevent_warning</code> predicate only when set, or split into <code>UNION ALL</code> branches</td><td>hours</td><td>Restores partition pruning on the 324 s P0 query. The highest-value change available</td></tr>
+<tr><td class="num">2</td><td><code>ANALYZE</code> all live partitions; set <code>autovacuum_analyze_scale_factor = 0.005</code> on <code>devicedata*</code></td><td>1 hour</td><td>The planner is blind on 42.9M+ rows</td></tr>
+<tr><td class="num">3</td><td><code>DROP INDEX idx_cadn_project_time_id</code> — byte-identical to the primary key</td><td>minutes</td><td>~25–30 GB per large partition, and insert cost on 40M rows a day</td></tr>
+<tr><td class="num">4</td><td><strong>Stop the gateway writing <code>nvaevent_data</code> into <code>datajson</code></strong>; route it to the archive instead</td><td>2–3 days</td><td>The single largest storage win — 48% of every detection row</td></tr>
+<tr><td class="num">5</td><td>Duplicate audit on <strong>SODN from 2026-07-08</strong>, then add a unique key and <code>ON CONFLICT DO NOTHING</code></td><td>1 day</td><td>The one window where trigger and backfill genuinely overlap</td></tr>
+<tr><td class="num">6</td><td>Drop both <code>FOR EACH ROW</code> triggers on <code>devicedata</code>; move the logic to the worker</td><td>1–2 days</td><td>Removes a per-row tax from ~40M inserts a day and stops projection errors aborting ingest</td></tr>
+<tr><td class="num">7</td><td><code>EXPLAIN</code> the <code>TRIM()</code> queries; add a matching expression index or remove the <code>TRIM</code></td><td>2 hours</td><td>259,719 calls in the sample window</td></tr>
+<tr><td class="num">8</td><td>Run the orphan audit on <code>devices</code>, <code>alert_logs</code> and <code>devicedata</code></td><td>hours</td><td>Must precede any tenancy split; orphans become unrecoverable afterwards</td></tr>
+</tbody></table></div>
+
+<h2 id="sizing">Sizing</h2>
+<p style="max-width:74ch">A contract deliverable, since CadPro specifies site hardware before signing. Assumptions: 28,750 events per camera per day; 282 B per projected row; 76% detections; 12–15× Parquet compression; projection hot for 90 days. The raw column assumes D12, D13 and D16 applied — without them, multiply it by roughly three.</p>
+<div class="tw"><table>
+<thead><tr><th class="num">Cameras</th><th class="num">PG hot · 30-day raw</th><th class="num">PG hot · 90-day raw</th><th class="num">Delta (NVMe)</th><th class="num">Parquet, 3 yr (NAS)</th></tr></thead>
+<tbody>
+<tr><td class="num">500</td><td class="num">~0.6 TB</td><td class="num">~1.3 TB</td><td class="num">+0.7 TB</td><td class="num">~2.4 TB</td></tr>
+<tr><td class="num">1,000</td><td class="num">~1.1 TB</td><td class="num">~2.6 TB</td><td class="num">+1.5 TB</td><td class="num">~4.8 TB</td></tr>
+<tr><td class="num"><strong>2,000</strong></td><td class="num"><strong>~2.2 TB</strong></td><td class="num"><strong>~5.2 TB</strong></td><td class="num"><strong>+3.0 TB</strong></td><td class="num">~9.6 TB</td></tr>
+<tr><td class="num">3,000</td><td class="num">~3.3 TB</td><td class="num">~7.8 TB</td><td class="num">+4.5 TB</td><td class="num">~14.4 TB</td></tr>
+</tbody></table></div>
+<p style="max-width:74ch">Add WAL and backup copies on top. The archive sits on the video NAS, already specified at 100+ TB, so it is effectively free; the expensive column is NVMe. <strong>D12 alone reduces the 2,000-camera NVMe requirement from ~12.4 TB to ~5.2 TB.</strong></p>
+<p style="max-width:74ch"><strong>This table covers cameras only.</strong> The position stream is additional and is driven by mobile-device count, not cameras: at 5-second intervals, roughly <strong>43 GB/month</strong> for Da Nang's ~400 mobile devices and <strong>~218 GB/month</strong> at 2,000. A year of hot positions at the larger figure is ~2.6 TB on its own, which is why the archive-thinning question in <a href="#moving">Moving objects</a> is a sizing decision and not only a data-fidelity one.</p>
+
+<h2 id="open">Open questions</h2>
+<div class="tw"><table>
+<thead><tr><th>Question</th><th>Why it matters</th><th>Status</th></tr></thead>
+<tbody>
+<tr><td><strong>Moving-object position: keep the trigger, or split into three tables?</strong> Live position currently reaches the map via a row-level <code>UPDATE public.object</code>; the proposal is <code>devicedata</code> for audit, <code>stream_position</code> for history, <code>device_state</code> for the map — plus no index but the PK on <code>device_state</code>, and a <code>gps_status</code> validity gate</td><td>Already built the current way, so this is a change to working code rather than a greenfield choice. At 5-second intervals it is 80 upserts/sec today and 400/sec at 2,000 mobile devices, so the physical design of the live-position table stops being a tuning detail. See <a href="#moving">Moving objects</a></td><td><span class="tag t-warn">team discussion</span></td></tr>
+<tr><td><strong>Does 5-second GPS resolution need to persist for the full retention window?</strong></td><td>Right for driver-behaviour analysis and trip playback; likely excessive for three-year reporting. Thinning to 30–60 s on archive would cut the position tier substantially</td><td><span class="tag t-warn">team discussion</span></td></tr>
+<tr><td><strong>Where does the AI confidence score come from?</strong> The product spec and the violations UI show 75–100% per detection, and <code>alert_logs.confidence</code> exists — but no confidence field appears anywhere in the LPR payload</td><td>A confidence number displayed beside a fine has to be real and traceable. It is either supplied out of band, computed downstream, or currently placeholder data</td><td><span class="tag t-crit">launch-blocking</span></td></tr>
+<tr><td><strong>Does the enforcement fleet support ONVIF PTZ position read-back?</strong></td><td>Without it, someone repositioning a camera by hand at the roadside cabinet is invisible to the platform, and detections keep being attributed to a lane it stopped watching. If read-back is unavailable, the safer rule is that LPR and PTZ are mutually exclusive on enforcement devices</td><td><span class="tag t-crit">blocks PTZ enforcement</span></td></tr>
+<tr><td><strong>Are historical detections attributable?</strong> Existing rows have no <code>preset_id</code> because presets are not yet calibrated</td><td>Affects the defensibility of already-issued fines from PTZ-capable cameras. Much cheaper to establish now than in a contested case</td><td><span class="tag t-warn">audit needed</span></td></tr>
+<tr><td><strong>Which encoding were existing helmet fines issued from?</strong> Helmet status currently lives in both <code>nvaevent_feature</code> and <code>error_bitmask</code></td><td>Making <code>error_bitmask</code> authoritative (D23) would strand the provenance of fines issued from the tag array</td><td><span class="tag t-warn">audit needed</span></td></tr>
+<tr><td><strong>No command/ack payload sample.</strong> Stream 6 is designed, not validated</td><td>The only stream where the platform writes to a device. Firmware needs to confirm whether there is an application-level ack — distinct from a TCP ACK or a gateway HTTP 200 — and whether it carries the command id</td><td><span class="tag t-warn">design at risk</span></td></tr>
+<tr><td><strong>Green wave rollback:</strong> five of eight controllers accept, three fail. Revert, or leave a partly-coordinated corridor?</td><td>Whether an uncoordinated corridor is more dangerous than a reverted one is a traffic engineering judgement, not an architecture one</td><td><span class="tag t-warn">needs an owner</span></td></tr>
+<tr><td><strong>Priority-grant conflicts:</strong> two emergency routes crossing the same intersection in the same window</td><td>An operational rule someone must own; the schema only needs to record the resolution</td><td><span class="tag t-warn">needs an owner</span></td></tr>
+<tr><td><strong>Is <code>bbox</code> usable?</strong> All four coordinates are <code>"0"</code> in the sample, and <code>imgwidth/imgheight</code> of 640×480 contradicts the track header's 1920×1080</td><td>No point reserving a column for coordinates that are always zero. One <code>TABLESAMPLE</code> query settles it</td><td><span class="tag t-ok">query ready</span></td></tr>
+<tr><td><strong>Is the environmental unit one physical multi-sensor device?</strong> It reports air quality, noise, flood level and weather together</td><td>If so, the product spec's "25 air quality monitors + 18 flood sensors" double-counts one fleet</td><td><span class="tag t-ok">confirm</span></td></tr>
+<tr><td><code>stream_measurement</code> <strong>width ceiling</strong> before splitting; <code>geometry</code> vs <code>geography</code>; FK from <code>devicedata</code> to <code>device</code>; rollup shape</td><td>All four are reversible later and none blocks the migration</td><td><span class="tag t-ok">non-blocking</span></td></tr>
+</tbody></table></div>
+</div>
+
+<footer>
+  <p><strong>Source records:</strong> ADR-001 device data architecture · ADR-002 target schema DDL · ADR-003 device command &amp; control · ADR-004 device capability &amp; feature toggles. Those remain the authoritative decision log; this document consolidates them for review.</p>
+  <p>Measurements taken 3 September 2026 against PostgreSQL 16.14. Payload analysis covers four device families: LPR camera, bus GPS, environmental multi-sensor, signal control cabinet.</p>
+</footer>
+</main>
+</div>
+</body>
+</html>

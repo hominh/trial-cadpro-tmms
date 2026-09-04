@@ -1,0 +1,61 @@
+name: SDLC
+
+on:
+  pull_request:
+  push:
+    branches:
+      - main
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: sdlc-${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  validate:
+    name: validate
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Validate governance and architecture rules
+        shell: pwsh
+        run: ./scripts/validate-sdlc.ps1
+
+      - name: Detect application
+        id: app
+        shell: pwsh
+        run: |
+          "present=$((Test-Path -LiteralPath package.json).ToString().ToLowerInvariant())" |
+            Out-File -FilePath $env:GITHUB_OUTPUT -Append
+
+      - name: Setup Node.js
+        if: steps.app.outputs.present == 'true'
+        uses: actions/setup-node@v4
+        with:
+          node-version-file: .nvmrc
+
+      - name: Install dependencies
+        if: steps.app.outputs.present == 'true'
+        run: npm ci
+
+      - name: Lint
+        if: steps.app.outputs.present == 'true'
+        run: npm run lint
+
+      - name: Typecheck
+        if: steps.app.outputs.present == 'true'
+        run: npm run typecheck
+
+      - name: Test
+        if: steps.app.outputs.present == 'true'
+        run: npm test --if-present
+
+      - name: Production build
+        if: steps.app.outputs.present == 'true'
+        run: npm run build

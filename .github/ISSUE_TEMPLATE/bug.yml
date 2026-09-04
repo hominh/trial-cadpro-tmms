@@ -1,0 +1,39 @@
+name: Bug
+description: Báo lỗi có thể tái hiện
+title: "fix: "
+labels:
+  - bug
+body:
+  - type: textarea
+    id: observed
+    attributes:
+      label: Hành vi thực tế
+    validations:
+      required: true
+  - type: textarea
+    id: expected
+    attributes:
+      label: Hành vi mong đợi
+    validations:
+      required: true
+  - type: textarea
+    id: reproduce
+    attributes:
+      label: Cách tái hiện
+      placeholder: |
+        1. ...
+        2. ...
+    validations:
+      required: true
+  - type: textarea
+    id: impact
+    attributes:
+      label: Phạm vi ảnh hưởng
+      description: User, thiết bị, trình duyệt, môi trường và mức độ nghiêm trọng.
+    validations:
+      required: true
+  - type: textarea
+    id: evidence
+    attributes:
+      label: Bằng chứng đã loại bỏ dữ liệu nhạy cảm
+      description: Log, ảnh hoặc trace đã redact; không đăng secret hay dữ liệu khách hàng.
