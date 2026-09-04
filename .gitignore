@@ -1,5 +1,7 @@
 # Dependencies
 node_modules/
+dist/
+build/
 
 # Next.js
 .next/
@@ -7,6 +9,8 @@ out/
 
 # Tests and tooling
 coverage/
+playwright-report/
+test-results/
 .turbo/
 *.tsbuildinfo
 

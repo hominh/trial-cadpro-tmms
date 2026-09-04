@@ -201,7 +201,9 @@ mobile + void/invalid fix --------> hold last valid position
 mobile + isStatic ----------------> hold displayed position
 mobile + valid newer fix + moving -> interpolate to confirmed target
 interpolating + newer valid fix ---> retarget from current displayed position
-background/reduced-motion/jump ----> snap safely to confirmed target
+inferred speed >120 km/h ----------> snap to confirmed target
+valid-fix gap >8 seconds ----------> snap to confirmed target
+background/reduced-motion ---------> preserve elapsed-time linear semantics
 ```
 
 ## Error model

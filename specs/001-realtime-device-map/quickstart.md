@@ -29,6 +29,7 @@ npm ci
 npm run lint
 npm run typecheck
 npm test
+npm run test:e2e
 npm run build
 powershell -ExecutionPolicy Bypass -File scripts/validate-sdlc.ps1
 ```
@@ -160,6 +161,14 @@ Expected:
 - Đạt các SC-001, SC-002 và mục tiêu ít nhất 30 fps của plan.
 - Một poll tạo tối đa một Map clone/store commit; chỉ marker đang di chuyển tham gia rAF.
 - `422` không render partial data và hướng dẫn người dùng zoom hoặc lọc.
+
+## Implementation evidence (2026-09-04)
+
+- Local quality run: lint, strict typecheck, 31 automated tests (28 passed, three real-provider cases skipped), production build, architecture validation, and 5 Chromium E2E scenarios passed.
+- SC-007: `tests/e2e/device-map-us3.spec.ts` runs one warm-up plus 20 measured search-to-detail samples and asserts p95 <= 10 seconds against a deterministic 5,000-device backing dataset.
+- Mock contract evidence: `tests/contract/device-map-provider.contract.spec.ts` proves response shape, ETag/304, dense viewport 422, and an online-to-offline representation/ETag transition.
+- Pending release evidence: the provider suite has not run against a real backend because `PROVIDER_CONTRACT_BASE_URL` and seeded provider viewports were not supplied.
+- Pending release evidence: the controlled 4 vCPU/8 GB, Fast 3G/4G performance profile has not been run in this workspace.
 
 ## Evidence to retain
 

@@ -27,12 +27,12 @@ at its checkpoint.
 **Purpose**: Create the greenfield Next.js application and quality toolchain required by every
 story. Tasks in this phase run in order unless marked `[P]`.
 
-- [ ] T001 Initialize the Next.js App Router application with Node.js 22 and strict TypeScript in `package.json`, `package-lock.json`, `tsconfig.json`, `next.config.ts`, `src/app/layout.tsx`, and `src/app/page.tsx`
-- [ ] T002 Add Axios, Zustand, Leaflet, react-leaflet, MSW, and required type packages plus `lint`, `typecheck`, `test`, `test:e2e`, and `build` scripts in `package.json` and `package-lock.json`
-- [ ] T003 Configure Vitest, React Testing Library, jsdom, and Playwright in `vitest.config.ts`, `playwright.config.ts`, and `src/test/setup.ts`
-- [ ] T004 [P] Configure shadcn/ui and global Leaflet-compatible styling in `components.json`, `postcss.config.mjs`, and `src/app/globals.css`
-- [ ] T005 [P] Document the public API base URL and map tile configuration without secrets in `.env.example`
-- [ ] T006 Create the planned feature directory boundaries and public export surface in `src/features/realtime-device-map/index.ts`, `src/features/realtime-device-map/components/`, `src/features/realtime-device-map/hooks/`, `src/features/realtime-device-map/services/`, `src/features/realtime-device-map/stores/`, `src/features/realtime-device-map/types/`, and `src/features/realtime-device-map/utils/`
+- [X] T001 Initialize the Next.js App Router application with Node.js 22 and strict TypeScript in `package.json`, `package-lock.json`, `tsconfig.json`, `next.config.ts`, `src/app/layout.tsx`, and `src/app/page.tsx`
+- [X] T002 Add Axios, Zustand, Leaflet, react-leaflet, MSW, and required type packages plus `lint`, `typecheck`, `test`, `test:e2e`, and `build` scripts in `package.json` and `package-lock.json`
+- [X] T003 Configure Vitest, React Testing Library, jsdom, and Playwright in `vitest.config.ts`, `playwright.config.ts`, and `src/test/setup.ts`
+- [X] T004 [P] Configure shadcn/ui and global Leaflet-compatible styling in `components.json`, `postcss.config.mjs`, and `src/app/globals.css`
+- [X] T005 [P] Document the public API base URL and map tile configuration without secrets in `.env.example`
+- [X] T006 Create the planned feature directory boundaries and public export surface in `src/features/realtime-device-map/index.ts`, `src/features/realtime-device-map/components/`, `src/features/realtime-device-map/hooks/`, `src/features/realtime-device-map/services/`, `src/features/realtime-device-map/stores/`, `src/features/realtime-device-map/types/`, and `src/features/realtime-device-map/utils/`
 
 **Checkpoint**: The application installs, starts, typechecks, and exposes an empty feature boundary.
 
@@ -48,13 +48,13 @@ is unavailable, T014 may provisionally run against the OpenAPI-backed MSW server
 developed in parallel, but T014 remains blocking for the final US1 integration/E2E checkpoint and
 release until the same provider suite passes against the real backend.
 
-- [ ] T007 Define strict `DeviceId`, `GeoPoint`, `ViewportBounds`, `DeviceMapFilters`, `DeviceState`, `DeviceMapSnapshot`, and problem response types from the OpenAPI contract in `src/features/realtime-device-map/types/device-map.types.ts`
-- [ ] T008 [P] Write failing tests for bbox validation, CRS84 serialization, normalized query keys, filter normalization, and dateline rejection in `src/features/realtime-device-map/utils/bbox.test.ts`
-- [ ] T009 Implement bbox validation, CRS84 serialization, normalized query keys, and filter normalization to satisfy T008 in `src/features/realtime-device-map/utils/bbox.ts`
-- [ ] T010 [P] Create the sole shared Axios instance with base URL, credentials policy, timeout, normalized errors, and AbortSignal support in `src/helpers/api/client.ts`
-- [ ] T011 [P] Create deterministic fixed/mobile/void/offline/unknown-type snapshot factories, including 2.000- and 5.001-device generators, in `tests/fixtures/device-map/device-map.fixtures.ts`
-- [ ] T012 [P] Create Zustand reset helpers, fake clock controls, and map-safe component render utilities in `src/test/device-map-test-utils.tsx`
-- [ ] T013 Add the required shadcn/ui Button, Input, Select, Badge, Tooltip, Sheet, Drawer, Popover, Skeleton, and Alert primitives under `src/components/ui/`
+- [X] T007 Define strict `DeviceId`, `GeoPoint`, `ViewportBounds`, `DeviceMapFilters`, `DeviceState`, `DeviceMapSnapshot`, and problem response types from the OpenAPI contract in `src/features/realtime-device-map/types/device-map.types.ts`
+- [X] T008 [P] Write failing tests for bbox validation, CRS84 serialization, normalized query keys, filter normalization, and dateline rejection in `src/features/realtime-device-map/utils/bbox.test.ts`
+- [X] T009 Implement bbox validation, CRS84 serialization, normalized query keys, and filter normalization to satisfy T008 in `src/features/realtime-device-map/utils/bbox.ts`
+- [X] T010 [P] Create the sole shared Axios instance with base URL, credentials policy, timeout, normalized errors, and AbortSignal support in `src/helpers/api/client.ts`
+- [X] T011 [P] Create deterministic fixed/mobile/void/offline/unknown-type snapshot factories, including 2.000- and 5.001-device generators, in `tests/fixtures/device-map/device-map.fixtures.ts`
+- [X] T012 [P] Create Zustand reset helpers, fake clock controls, and map-safe component render utilities in `src/test/device-map-test-utils.tsx`
+- [X] T013 Add the required shadcn/ui Button, Input, Select, Badge, Tooltip, Sheet, Drawer, Popover, Skeleton, and Alert primitives under `src/components/ui/`
 - [ ] T014 Validate the real backend against `specs/001-realtime-device-map/contracts/device-map.openapi.yaml` with provider contract tests covering response shape, ETag/304, `422 VIEWPORT_TOO_DENSE`, and a changed ETag/200 response when a device becomes offline after 30 seconds without new telemetry in `tests/contract/device-map-provider.contract.spec.ts`; when the backend is unavailable, implement an OpenAPI-conformant MSW fallback in `tests/mocks/device-map/` for parallel US1–US3 development, but keep this task open until the provider suite passes against the real backend
 
 **Checkpoint**: Contracts are typed, network calls have one boundary, geometry rules pass, fixtures
@@ -76,22 +76,22 @@ only the new bbox, and network failure preserves the last valid snapshot.
 
 > Write these tests first and confirm they fail before implementing the story.
 
-- [ ] T015 [P] [US1] Write Axios service contract tests for bbox/filter encoding, ETag, 200/304, 400, 422, 429, and malformed snapshots in `src/features/realtime-device-map/services/device-map-api.test.ts`
-- [ ] T016 [P] [US1] Write store tests for one-clone snapshot apply, `stateVersion` ordering, stable unchanged references, membership reconciliation, 304 freshness, stale retention, and too-dense state in `src/features/realtime-device-map/stores/device-state-store.test.ts`
-- [ ] T017 [P] [US1] Write fake-timer and Strict Mode tests for immediate polling, one interval, abort-before-replace, generation/query guards, viewport changes, 429 delay, cancellation handling, and unmount cleanup in `src/features/realtime-device-map/hooks/use-device-polling.test.tsx`
-- [ ] T018 [P] [US1] Write component tests for initial skeleton, `moveend` bbox publication, fixed marker stability, type/status icons, unknown fallback, loading/stale/error/too-dense overlays, and non-color status text in `src/features/realtime-device-map/components/device-map.test.tsx`
+- [X] T015 [P] [US1] Write Axios service contract tests for bbox/filter encoding, ETag, 200/304, 400, 422, 429, and malformed snapshots in `src/features/realtime-device-map/services/device-map-api.test.ts`
+- [X] T016 [P] [US1] Write store tests for one-clone snapshot apply, `stateVersion` ordering, stable unchanged references, membership reconciliation, 304 freshness, stale retention, and too-dense state in `src/features/realtime-device-map/stores/device-state-store.test.ts`
+- [X] T017 [P] [US1] Write fake-timer and Strict Mode tests for immediate polling, one interval, abort-before-replace, generation/query guards, viewport changes, 429 delay, cancellation handling, and unmount cleanup in `src/features/realtime-device-map/hooks/use-device-polling.test.tsx`
+- [X] T018 [P] [US1] Write component tests for initial skeleton, `moveend` bbox publication, fixed marker stability, type/status icons, unknown fallback, loading/stale/error/too-dense overlays, and non-color status text in `src/features/realtime-device-map/components/device-map.test.tsx`
 - [ ] T019 [P] [US1] Write the failing P1 browser acceptance scenario for initial viewport, fixed-device jitter, offline threshold, pan/zoom, request scoping, and provider-backed integration in `tests/e2e/device-map-us1.spec.ts`; this task MUST NOT be marked Done until T014 passes against the real backend
 
 ### Implementation for User Story 1
 
-- [ ] T020 [US1] Implement the typed viewport snapshot request, ETag cache per normalized query, status/problem mapping, and AbortSignal forwarding through the shared client in `src/features/realtime-device-map/services/device-map-api.ts`
-- [ ] T021 [US1] Implement immutable `Map<DeviceId, DeviceState>` snapshot upsert/reconcile, version guards, visible IDs, freshness, stale/error, 304, and too-dense actions in `src/features/realtime-device-map/stores/device-state-store.ts`
-- [ ] T022 [US1] Implement immediate four-second single-flight polling with `setInterval`, AbortController replacement, generation/query guards, Retry-After handling, and idempotent cleanup in `src/features/realtime-device-map/hooks/use-device-polling.ts`
-- [ ] T023 [P] [US1] Implement the trusted cached `L.divIcon` registry for `lpr_camera`, `bus_gps`, `env_multi`, `signal_ctrl`, unknown type, connectivity, alert, and selection variants in `src/features/realtime-device-map/utils/device-icon.ts`
-- [ ] T024 [P] [US1] Implement the client-only dynamic Leaflet loader with a fixed-size skeleton and `ssr: false` in `src/features/realtime-device-map/components/map-client-loader.tsx`
-- [ ] T025 [US1] Implement `MapContainer`, Leaflet CSS boundary, initial bounds, normalized `moveend` viewport publication, and polling composition in `src/features/realtime-device-map/components/device-map.tsx`
-- [ ] T026 [US1] Implement imperative marker registry reconciliation for complete snapshots, fixed canonical positions, stable keys/refs, cached icons, and marker removal in `src/features/realtime-device-map/components/device-marker-layer.tsx`
-- [ ] T027 [P] [US1] Implement loading, empty, stale with last-success, error, unlocated count, and `VIEWPORT_TOO_DENSE` guidance states in `src/features/realtime-device-map/components/map-status-overlay.tsx`
+- [X] T020 [US1] Implement the typed viewport snapshot request, ETag cache per normalized query, status/problem mapping, and AbortSignal forwarding through the shared client in `src/features/realtime-device-map/services/device-map-api.ts`
+- [X] T021 [US1] Implement immutable `Map<DeviceId, DeviceState>` snapshot upsert/reconcile, version guards, visible IDs, freshness, stale/error, 304, and too-dense actions in `src/features/realtime-device-map/stores/device-state-store.ts`
+- [X] T022 [US1] Implement immediate four-second single-flight polling with `setInterval`, AbortController replacement, generation/query guards, Retry-After handling, and idempotent cleanup in `src/features/realtime-device-map/hooks/use-device-polling.ts`
+- [X] T023 [P] [US1] Implement the trusted cached `L.divIcon` registry for `lpr_camera`, `bus_gps`, `env_multi`, `signal_ctrl`, unknown type, connectivity, alert, and selection variants in `src/features/realtime-device-map/utils/device-icon.ts`
+- [X] T024 [P] [US1] Implement the client-only dynamic Leaflet loader with a fixed-size skeleton and `ssr: false` in `src/features/realtime-device-map/components/map-client-loader.tsx`
+- [X] T025 [US1] Implement `MapContainer`, Leaflet CSS boundary, initial bounds, normalized `moveend` viewport publication, and polling composition in `src/features/realtime-device-map/components/device-map.tsx`
+- [X] T026 [US1] Implement imperative marker registry reconciliation for complete snapshots, fixed canonical positions, stable keys/refs, cached icons, and marker removal in `src/features/realtime-device-map/components/device-marker-layer.tsx`
+- [X] T027 [P] [US1] Implement loading, empty, stale with last-success, error, unlocated count, and `VIEWPORT_TOO_DENSE` guidance states in `src/features/realtime-device-map/components/map-status-overlay.tsx`
 - [ ] T028 [US1] Compose the server route shell and client loader, export the feature entry point, and make the P1 acceptance test pass in `src/app/map/page.tsx` and `src/features/realtime-device-map/index.ts`; the US1 integration checkpoint MUST NOT be marked Done until T014 passes against the real backend
 
 **Checkpoint**: User Story 1 is deployable as the MVP and independently passes its component,
@@ -113,17 +113,17 @@ and that the final marker remains at the newest valid confirmed position.
 
 > Write these tests first and confirm they fail before implementing the story.
 
-- [ ] T029 [P] [US2] Write motion math tests for linear interpolation over the exact elapsed time between valid fixes, inferred-speed calculation, snap only above 120 km/h or above an eight-second fix gap, coordinate validation, and shortest-angle heading rotation in `src/features/realtime-device-map/utils/motion.test.ts`
-- [ ] T030 [P] [US2] Write fake-rAF tests for a single linear scheduler, retargeting from displayed position, exact elapsed-time duration, the 120 km/h/eight-second snap boundaries, background resume, reduced motion without an extra snap condition, disposal, and no Zustand frame commits in `src/features/realtime-device-map/hooks/use-marker-motion.test.tsx`
-- [ ] T031 [P] [US2] Write marker integration tests for linear mobile movement, snap only above 120 km/h or an eight-second fix gap, fixed/static hold, GPS `V`, invalid coordinates, heading rotation, and marker deduplication in `src/features/realtime-device-map/components/device-marker-layer.motion.test.tsx`
+- [X] T029 [P] [US2] Write motion math tests for linear interpolation over the exact elapsed time between valid fixes, inferred-speed calculation, snap only above 120 km/h or above an eight-second fix gap, coordinate validation, and shortest-angle heading rotation in `src/features/realtime-device-map/utils/motion.test.ts`
+- [X] T030 [P] [US2] Write fake-rAF tests for a single linear scheduler, retargeting from displayed position, exact elapsed-time duration, the 120 km/h/eight-second snap boundaries, background resume, reduced motion without an extra snap condition, disposal, and no Zustand frame commits in `src/features/realtime-device-map/hooks/use-marker-motion.test.tsx`
+- [X] T031 [P] [US2] Write marker integration tests for linear mobile movement, snap only above 120 km/h or an eight-second fix gap, fixed/static hold, GPS `V`, invalid coordinates, heading rotation, and marker deduplication in `src/features/realtime-device-map/components/device-marker-layer.motion.test.tsx`
 
 ### Implementation for User Story 2
 
-- [ ] T032 [US2] Implement linear interpolation, exact elapsed-time duration, inferred-speed calculation, the exclusive 120 km/h/eight-second snap rules, coordinate validation, and shortest-angle helpers to satisfy T029 in `src/features/realtime-device-map/utils/motion.ts`
-- [ ] T033 [US2] Implement one shared linear `requestAnimationFrame` motion registry with retarget, elapsed-time completion, background resume, reduced-motion handling without adding a snap condition, and cleanup in `src/features/realtime-device-map/hooks/use-marker-motion.ts`
-- [ ] T034 [US2] Add defensive GPS `V`, invalid-position, `positionVersion`, and `isStatic` merge guards without discarding valid non-position metadata in `src/features/realtime-device-map/stores/device-state-store.ts`
-- [ ] T035 [US2] Connect visible mobile marker refs to the shared motion controller, rotate only the trusted icon inner element, and preserve Leaflet outer transforms in `src/features/realtime-device-map/components/device-marker-layer.tsx`
-- [ ] T036 [US2] Add shallow marker DOM, heading/status classes, animation containment, and `prefers-reduced-motion` behavior in `src/app/globals.css`
+- [X] T032 [US2] Implement linear interpolation, exact elapsed-time duration, inferred-speed calculation, the exclusive 120 km/h/eight-second snap rules, coordinate validation, and shortest-angle helpers to satisfy T029 in `src/features/realtime-device-map/utils/motion.ts`
+- [X] T033 [US2] Implement one shared linear `requestAnimationFrame` motion registry with retarget, elapsed-time completion, background resume, reduced-motion handling without adding a snap condition, and cleanup in `src/features/realtime-device-map/hooks/use-marker-motion.ts`
+- [X] T034 [US2] Add defensive GPS `V`, invalid-position, `positionVersion`, and `isStatic` merge guards without discarding valid non-position metadata in `src/features/realtime-device-map/stores/device-state-store.ts`
+- [X] T035 [US2] Connect visible mobile marker refs to the shared motion controller, rotate only the trusted icon inner element, and preserve Leaflet outer transforms in `src/features/realtime-device-map/components/device-marker-layer.tsx`
+- [X] T036 [US2] Add shallow marker DOM, heading/status classes, animation containment, and `prefers-reduced-motion` behavior in `src/app/globals.css`
 
 **Checkpoint**: User Stories 1 and 2 pass independently; no invalid or obsolete fix can move a marker.
 
@@ -143,17 +143,17 @@ clears with accessible focus/status behavior.
 
 > Write these tests first and confirm they fail before implementing the story.
 
-- [ ] T037 [P] [US3] Write UI store tests for normalized viewport, type/status/query filters, selected device, panel state, and selection cleanup after reconciliation in `src/features/realtime-device-map/stores/map-ui-store.test.ts`
-- [ ] T038 [P] [US3] Write accessible component tests for filter controls, zero results, detail fields, fixed/mobile variants, overlapping-device chooser, keyboard focus, and touch-sized controls in `src/features/realtime-device-map/components/device-map-controls.test.tsx`
-- [ ] T039 [P] [US3] Write the failing P3 browser acceptance flow for filter, partial case-insensitive code/name search, marker selection, detail inspection, snapshot removal, keyboard navigation, and touch viewport, and measure p95 from the first search character until the complete detail panel is visible at no more than 10 seconds on the 5.000-device fixture in `tests/e2e/device-map-us3.spec.ts`
+- [X] T037 [P] [US3] Write UI store tests for normalized viewport, type/status/query filters, selected device, panel state, and selection cleanup after reconciliation in `src/features/realtime-device-map/stores/map-ui-store.test.ts`
+- [X] T038 [P] [US3] Write accessible component tests for filter controls, zero results, detail fields, fixed/mobile variants, overlapping-device chooser, keyboard focus, and touch-sized controls in `src/features/realtime-device-map/components/device-map-controls.test.tsx`
+- [X] T039 [P] [US3] Write the failing P3 browser acceptance flow for filter, partial case-insensitive code/name search, marker selection, detail inspection, snapshot removal, keyboard navigation, and touch viewport, and measure p95 from the first search character until the complete detail panel is visible at no more than 10 seconds on the 5.000-device fixture in `tests/e2e/device-map-us3.spec.ts`
 
 ### Implementation for User Story 3
 
-- [ ] T040 [US3] Implement the independent viewport/filter/selection/panel Zustand domain with narrow selectors and reset actions in `src/features/realtime-device-map/stores/map-ui-store.ts`
-- [ ] T041 [P] [US3] Implement debounced partial case-insensitive search across `device.code` and `device.name` plus type and online/offline shadcn controls with explicit empty-filter semantics in `src/features/realtime-device-map/components/device-map-filters.tsx`
-- [ ] T042 [P] [US3] Implement responsive shadcn Sheet/Drawer details for name, code, type, last seen, alert, active preset, preset source, speed, heading, and offline text in `src/features/realtime-device-map/components/device-detail-panel.tsx`
-- [ ] T043 [US3] Implement trusted grouped selection for collocated markers using a shadcn Popover/list and route selection to a single device ID in `src/features/realtime-device-map/components/device-marker-layer.tsx`
-- [ ] T044 [US3] Integrate filters, selection, detail panel, focus restoration, query changes, and missing-selected-device cleanup in `src/features/realtime-device-map/components/device-map.tsx`
+- [X] T040 [US3] Implement the independent viewport/filter/selection/panel Zustand domain with narrow selectors and reset actions in `src/features/realtime-device-map/stores/map-ui-store.ts`
+- [X] T041 [P] [US3] Implement debounced partial case-insensitive search across `device.code` and `device.name` plus type and online/offline shadcn controls with explicit empty-filter semantics in `src/features/realtime-device-map/components/device-map-filters.tsx`
+- [X] T042 [P] [US3] Implement responsive shadcn Sheet/Drawer details for name, code, type, last seen, alert, active preset, preset source, speed, heading, and offline text in `src/features/realtime-device-map/components/device-detail-panel.tsx`
+- [X] T043 [US3] Implement trusted grouped selection for collocated markers using a shadcn Popover/list and route selection to a single device ID in `src/features/realtime-device-map/components/device-marker-layer.tsx`
+- [X] T044 [US3] Integrate filters, selection, detail panel, focus restoration, query changes, and missing-selected-device cleanup in `src/features/realtime-device-map/components/device-map.tsx`
 
 **Checkpoint**: All three user stories are functional, independently testable, and satisfy their
 acceptance scenarios.
@@ -165,14 +165,14 @@ acceptance scenarios.
 **Purpose**: Prove scale, accessibility, architecture compliance, and release readiness across all
 stories.
 
-- [ ] T045 [P] Generate deterministic 2.000-device, 5.000-device (~40% mobile/~60% static), mixed-motion, and 5.001-device density fixtures with documented fixed seeds in `tests/fixtures/device-map/generate-device-map-fixtures.ts`
+- [X] T045 [P] Generate deterministic 2.000-device, 5.000-device (~40% mobile/~60% static), mixed-motion, and 5.001-device density fixtures with documented fixed seeds in `tests/fixtures/device-map/generate-device-map-fixtures.ts`
 - [ ] T046 Run and automate initial display, interaction latency, SC-007 search-to-complete-panel p95, frame-rate, Map-clone/store-commit, DOM-depth, and memory assertions using Chromium headless via Playwright on 4 vCPU/8 GB RAM with `Fast 3G/4G` throttling, one warm-up, and three measured runs reported by median for the fixed-seed 5.000-device fixture in `tests/performance/device-map.performance.test.ts`
-- [ ] T047 [P] Add the combined quickstart browser flow for cancellation races, ETag/304, stale recovery, 30-second offline transition with changed ETag/200, partial case-insensitive code/name search, detail, and density guard in `tests/e2e/device-map.spec.ts`
-- [ ] T048 [P] Add automated keyboard, focus, accessible-name, non-color status, reduced-motion, and tablet touch checks in `tests/e2e/device-map-accessibility.spec.ts`
-- [ ] T049 Extend architecture validation to reject server-graph Leaflet imports, direct `fetch`, feature-local Axios instances, TanStack Query, extra UI libraries, and mixed Zustand domains in `scripts/validate-sdlc.ps1`
-- [ ] T050 [P] Document map environment variables, tile attribution, local mock setup, validation commands, known density behavior, and troubleshooting in `README.md` and `docs/SDLC.md`
+- [X] T047 [P] Add the combined quickstart browser flow for cancellation races, ETag/304, stale recovery, 30-second offline transition with changed ETag/200, partial case-insensitive code/name search, detail, and density guard in `tests/e2e/device-map.spec.ts`
+- [X] T048 [P] Add automated keyboard, focus, accessible-name, non-color status, reduced-motion, and tablet touch checks in `tests/e2e/device-map-accessibility.spec.ts`
+- [X] T049 Extend architecture validation to reject server-graph Leaflet imports, direct `fetch`, feature-local Axios instances, TanStack Query, extra UI libraries, and mixed Zustand domains in `scripts/validate-sdlc.ps1`
+- [X] T050 [P] Document map environment variables, tile attribution, local mock setup, validation commands, known density behavior, and troubleshooting in `README.md` and `docs/SDLC.md`
 - [ ] T051 Run every scenario in `specs/001-realtime-device-map/quickstart.md` and record implementation-specific evidence links in `specs/001-realtime-device-map/quickstart.md`
-- [ ] T052 Run `npm run lint`, `npm run typecheck`, `npm test`, `npm run test:e2e`, `npm run build`, and `scripts/validate-sdlc.ps1`, then record final requirement traceability in `specs/001-realtime-device-map/checklists/implementation.md`
+- [X] T052 Run `npm run lint`, `npm run typecheck`, `npm test`, `npm run test:e2e`, `npm run build`, and `scripts/validate-sdlc.ps1`, then record final requirement traceability in `specs/001-realtime-device-map/checklists/implementation.md`
 
 **Checkpoint**: The feature meets all success criteria and is ready for review.
 
