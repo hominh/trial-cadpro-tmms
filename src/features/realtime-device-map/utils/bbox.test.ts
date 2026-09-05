@@ -9,13 +9,23 @@ describe("bbox utilities", () => {
   });
 
   it("normalizes filters and produces stable query keys", () => {
-    const a = { deviceTypes: new Set([" bus_gps ", "lpr_camera"]), status: "all" as const, query: " Bus " };
-    const b = { deviceTypes: new Set(["lpr_camera", "bus_gps"]), status: "all" as const, query: "Bus" };
+    const a = {
+      deviceTypes: new Set([" bus_gps ", "lpr_camera"]),
+      status: "all" as const,
+      query: " Bus ",
+    };
+    const b = {
+      deviceTypes: new Set(["lpr_camera", "bus_gps"]),
+      status: "all" as const,
+      query: "Bus",
+    };
     expect(normalizeFilters(a).query).toBe("Bus");
     expect(createQueryKey(bounds, a)).toBe(createQueryKey(normalizeBounds(bounds), b));
   });
 
   it("rejects dateline crossing", () => {
-    expect(() => normalizeBounds({ west: 170, south: -10, east: -170, north: 10 })).toThrow(/Dateline/);
+    expect(() => normalizeBounds({ west: 170, south: -10, east: -170, north: 10 })).toThrow(
+      /Dateline/
+    );
   });
 });

@@ -1,4 +1,16 @@
 import "@testing-library/jest-dom/vitest";
+import { afterAll, afterEach, beforeAll } from "vitest";
+import {
+  deviceManagementServer,
+  resetDeviceManagementMock,
+} from "../../tests/mocks/device-management/server";
+
+beforeAll(() => deviceManagementServer.listen({ onUnhandledRequest: "bypass" }));
+afterEach(() => {
+  deviceManagementServer.resetHandlers();
+  resetDeviceManagementMock();
+});
+afterAll(() => deviceManagementServer.close());
 
 Object.defineProperty(window, "matchMedia", {
   writable: true,

@@ -1,5 +1,11 @@
 import { create } from "zustand";
-import { DEFAULT_FILTERS, type ConnectivityFilter, type DeviceId, type DeviceMapFilters, type ViewportBounds } from "../types/device-map.types";
+import {
+  DEFAULT_FILTERS,
+  type ConnectivityFilter,
+  type DeviceId,
+  type DeviceMapFilters,
+  type ViewportBounds,
+} from "../types/device-map.types";
 import { normalizeBounds } from "../utils/bbox";
 
 interface MapUiStore {
@@ -17,16 +23,29 @@ interface MapUiStore {
   reset: () => void;
 }
 
-const initial = { selectedDeviceId: null, viewportBounds: null, filters: DEFAULT_FILTERS, detailPanelOpen: false };
+const initial = {
+  selectedDeviceId: null,
+  viewportBounds: null,
+  filters: DEFAULT_FILTERS,
+  detailPanelOpen: false,
+};
 
 export const useMapUiStore = create<MapUiStore>((set) => ({
   ...initial,
   setViewportBounds: (viewportBounds) => set({ viewportBounds: normalizeBounds(viewportBounds) }),
-  setDeviceTypes: (deviceTypes) => set((state) => ({ filters: { ...state.filters, deviceTypes: new Set(deviceTypes) } })),
+  setDeviceTypes: (deviceTypes) =>
+    set((state) => ({ filters: { ...state.filters, deviceTypes: new Set(deviceTypes) } })),
   setStatus: (status) => set((state) => ({ filters: { ...state.filters, status } })),
-  setQuery: (query) => set((state) => ({ filters: { ...state.filters, query: query.slice(0, 100) } })),
-  selectDevice: (selectedDeviceId) => set({ selectedDeviceId, detailPanelOpen: selectedDeviceId !== null }),
+  setQuery: (query) =>
+    set((state) => ({ filters: { ...state.filters, query: query.slice(0, 100) } })),
+  selectDevice: (selectedDeviceId) =>
+    set({ selectedDeviceId, detailPanelOpen: selectedDeviceId !== null }),
   closeDetails: () => set({ detailPanelOpen: false }),
-  reconcileSelection: (visibleIds) => set((state) => state.selectedDeviceId && !visibleIds.has(state.selectedDeviceId) ? { selectedDeviceId: null, detailPanelOpen: false } : state),
+  reconcileSelection: (visibleIds) =>
+    set((state) =>
+      state.selectedDeviceId && !visibleIds.has(state.selectedDeviceId)
+        ? { selectedDeviceId: null, detailPanelOpen: false }
+        : state
+    ),
   reset: () => set({ ...initial, filters: { ...DEFAULT_FILTERS, deviceTypes: new Set() } }),
 }));

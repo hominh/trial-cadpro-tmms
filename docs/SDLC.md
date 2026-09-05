@@ -101,3 +101,12 @@ Sau commit đầu tiên, cấu hình ruleset cho `main`:
   profile 4 vCPU/8 GB và `Fast 3G/4G`; warm-up một lần, đo ba lần và báo trung vị.
 - Khi troubleshooting: kiểm tra API base URL/CORS, tile attribution, bbox order longitude/latitude,
   response `complete=true`, ETag và `poll_after_ms` nằm trong 3.000–5.000 ms.
+
+## 10. Device management validation
+
+- Feature source thuộc `src/features/device-management`; UI dùng shadcn/project-owned primitives, Axios
+  shared client và Zustand store tách catalog, feature, preset, access và UI state.
+- Local development dùng MSW contract cho `/devices`. Backend thật phải pass provider contract trước khi
+  đóng release gate, bao gồm ETag, idempotency, audit atomicity, self-approval và polygon calibration.
+- Performance profile cố định: 4 vCPU/8 GB, Chromium headless, Fast 3G/4G, fixed seed 10.000 device,
+  một warm-up và ba measured run; median p95 phải theo `specs/002-device-management/spec.md`.

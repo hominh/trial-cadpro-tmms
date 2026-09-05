@@ -6,7 +6,14 @@ export default function HomePage() {
       <p className="eyebrow">CADPRO · TMMS</p>
       <h1>Giám sát thiết bị giao thông theo thời gian thực.</h1>
       <p>Một bản đồ vận hành thống nhất cho camera, phương tiện, cảm biến và tủ tín hiệu.</p>
-      <Link className="primary-link" href="/map">Mở bản đồ vận hành</Link>
+      <div className="landing-actions">
+        <Link className="primary-link" href="/map">
+          Mở bản đồ vận hành
+        </Link>
+        <Link className="primary-link" href="/devices">
+          Quản lý thiết bị
+        </Link>
+      </div>
     </main>
   );
 }

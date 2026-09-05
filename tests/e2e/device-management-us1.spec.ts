@@ -1,0 +1,2 @@
+import { expect, test } from "@playwright/test";
+test("US1: renders a bounded device catalog and supports code/name filtering", async ({ page }) => { await page.goto("/devices"); await expect(page.getByRole("heading", { name: "Quản lý thiết bị" })).toBeVisible(); await expect(page.getByRole("table")).toBeVisible(); await page.getByLabel("Tìm thiết bị").fill("DEV-00002"); await expect(page.getByText("DEV-00002").first()).toBeVisible(); });
