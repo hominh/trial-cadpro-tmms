@@ -48,6 +48,9 @@
   documented equivalent; no direct `fetch` or feature-local Axios instance is allowed.
 - **UI system**: List the shadcn/ui primitives and project-owned components used; no other UI
   library is allowed.
+- **Styling system**: Confirm product UI uses Tailwind utility classes only. Reject CSS Modules,
+  feature-specific/custom CSS, inline `style` props, and CSS-in-JS. If a third-party override is
+  unavoidable, document its commented rule in `src/app/globals.css` and why utilities cannot express it.
 - **Data fetching**: Confirm Axios is used directly and TanStack Query is not introduced.
 - **State boundaries**: Classify state as local, UI-domain Zustand, or server-polling Zustand;
   polling and UI state must not share one monolithic store.

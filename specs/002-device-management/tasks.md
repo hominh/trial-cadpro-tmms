@@ -259,6 +259,13 @@ After Foundation, separate owners may work on US1, US2 and US3 using determinist
 
 ## Notes
 
+### Styling amendment — 2026-09-05
+
+- [X] T073 Migrate catalog/forms/JSON and preset editors under
+  `src/features/device-management/components/` to Tailwind utilities, remove inline style, and
+  verify standalone Leaflet form layout and responsive behavior in
+  `tests/e2e/tailwind-styling.spec.ts`. Evidence: `docs/styling-migration.md`.
+
 - `[P]` never authorizes parallel edits to the same file.
 - Cursor/page size MUST remain bounded; do not materialize 10.000 rows in the DOM.
 - ETag conflicts preserve user drafts; idempotency keys are reused only for retrying the same logical mutation.

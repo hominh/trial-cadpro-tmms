@@ -23,7 +23,12 @@ export function PolygonEditor({
   };
   const positions = vertices.map(([lng, lat]) => [lat, lng] as [number, number]);
   return (
-    <div className="polygon-map" aria-label="Bản đồ vùng phạt, click để thêm đỉnh">
+    <div
+      className={
+        "polygon-map h-[260px] overflow-hidden [border:1px_solid_#d6dad3] rounded-[0.6rem] [&_.leaflet-container]:w-full [&_.leaflet-container]:h-full"
+      }
+      aria-label="Bản đồ vùng phạt, click để thêm đỉnh"
+    >
       <MapContainer center={[10.77, 106.7]} zoom={15} scrollWheelZoom={false}>
         <TileLayer
           attribution="© OpenStreetMap"

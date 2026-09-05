@@ -31,13 +31,24 @@ export function DeviceDetailPanel() {
           </SheetDescription>
         </SheetHeader>
         {device && (
-          <dl className="device-detail-grid" data-testid="complete-device-detail">
+          <dl
+            className={
+              "device-detail-grid grid gap-0 mt-[1.5rem] [&_>_div]:grid [&_>_div]:grid-cols-[7.5rem_1fr] [&_>_div]:gap-4 [&_>_div]:p-[0.8rem_0] [&_>_div]:[border-bottom:1px_solid_#d6dad3] [&_dt]:text-[#5b6b65] [&_dt]:text-[0.8rem] [&_dd]:m-0 [&_dd]:font-[650]"
+            }
+            data-testid="complete-device-detail"
+          >
             <Detail label="Mã" value={device.code} />
             <Detail label="Loại" value={device.deviceType.name} />
             <Detail
               label="Kết nối"
               value={
-                <Badge className={device.online ? "online-badge" : "offline-badge"}>
+                <Badge
+                  className={
+                    device.online
+                      ? "online-badge text-[#075d45] [background:#dff4ea]"
+                      : "offline-badge text-[#5f6965] [background:#e7e9e8]"
+                  }
+                >
                   {device.online ? "Online" : "Offline"}
                 </Badge>
               }

@@ -17,7 +17,9 @@ export function DeviceFilters() {
     return () => window.clearTimeout(timer);
   }, [query, setSearch]);
   return (
-    <div className="device-filters">
+    <div
+      className={"device-filters flex flex-wrap gap-[0.65rem] items-end [&_>_div]:min-w-[150px]"}
+    >
       <div>
         <Label htmlFor="device-search">Tìm thiết bị</Label>
         <Input
@@ -31,7 +33,9 @@ export function DeviceFilters() {
         <Label htmlFor="device-status">Trạng thái</Label>
         <select
           id="device-status"
-          className="input"
+          className={
+            "input min-h-[44px] [border:1px_solid_#d6dad3] rounded-[0.5rem] bg-white text-[#10211d] p-[0.6rem_0.75rem] outline-none [&:focus]:[border-color:#0b6b53] [&:focus]:[box-shadow:0_0_0_3px_rgba(11,_107,_83,_0.15)]"
+          }
           value={filters.status ?? ""}
           onChange={(event) =>
             setFilters({ ...filters, status: event.target.value || undefined, cursor: null })
@@ -49,7 +53,9 @@ export function DeviceFilters() {
         <Label htmlFor="device-type">Loại thiết bị</Label>
         <select
           id="device-type"
-          className="input"
+          className={
+            "input min-h-[44px] [border:1px_solid_#d6dad3] rounded-[0.5rem] bg-white text-[#10211d] p-[0.6rem_0.75rem] outline-none [&:focus]:[border-color:#0b6b53] [&:focus]:[box-shadow:0_0_0_3px_rgba(11,_107,_83,_0.15)]"
+          }
           value={filters.deviceTypeId ?? ""}
           onChange={(event) =>
             setFilters({ ...filters, deviceTypeId: event.target.value || undefined, cursor: null })

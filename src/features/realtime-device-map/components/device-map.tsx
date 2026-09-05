@@ -1,6 +1,5 @@
 "use client";
 
-import "leaflet/dist/leaflet.css";
 import { useEffect, useMemo } from "react";
 import { MapContainer, TileLayer, useMap, useMapEvents } from "react-leaflet";
 import { DeviceDetailPanel } from "./device-detail-panel";
@@ -81,22 +80,39 @@ export function DeviceMap() {
   const attribution =
     process.env.NEXT_PUBLIC_MAP_TILE_ATTRIBUTION ?? "&copy; OpenStreetMap contributors";
   return (
-    <main className="map-page">
-      <header className="map-toolbar">
+    <main
+      className={
+        "map-page h-screen grid grid-rows-[auto_minmax(0,_1fr)] overflow-hidden [@media(max-width:760px)]:[&&&]:grid-rows-[auto_minmax(0,_1fr)]"
+      }
+    >
+      <header
+        className={
+          "map-toolbar relative z-[1000] flex items-end justify-between gap-5 [border-bottom:1px_solid_#d6dad3] p-[0.8rem_1rem] [background:rgba(255,_255,_252,_0.94)] [backdrop-filter:blur(12px)] [&_h1]:m-[0.18rem_0_0] [&_h1]:text-[1.5rem] [&_h1]:tracking-[-0.03em] [&_.eyebrow]:m-0 [@media(max-width:760px)]:[&&&]:items-stretch [@media(max-width:760px)]:[&&&]:flex-col"
+        }
+      >
         <div>
-          <p className="eyebrow">CADPRO · LIVE MAP</p>
+          <p
+            className={
+              "eyebrow [font:700_0.75rem/1_ui-monospace,_monospace] tracking-[0.2em] text-[#0b6b53]"
+            }
+          >
+            CADPRO · LIVE MAP
+          </p>
           <h1>Bản đồ thiết bị</h1>
         </div>
         <DeviceMapFilters />
       </header>
-      <section className="map-shell" aria-label="Bản đồ thiết bị realtime">
+      <section
+        className={"map-shell w-full h-full min-h-[480px] relative isolate"}
+        aria-label="Bản đồ thiết bị realtime"
+      >
         <MapContainer
           center={[10.7769, 106.7009]}
           zoom={13}
           minZoom={3}
           preferCanvas={false}
           keyboard
-          className="leaflet-map"
+          className={"leaflet-map w-full h-full min-h-[480px]"}
         >
           <TileLayer attribution={attribution} url={tileUrl} />
           <MapRuntime />

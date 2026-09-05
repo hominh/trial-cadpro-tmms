@@ -17,7 +17,7 @@ export function JsonObjectEditor({
 }) {
   const result = useMemo(() => parseJsonObject(value), [value]);
   return (
-    <div className="field">
+    <div className={"field grid gap-[0.35rem]"}>
       <Label htmlFor={id}>{label}</Label>
       <Textarea
         id={id}
@@ -29,7 +29,7 @@ export function JsonObjectEditor({
         spellCheck={false}
       />
       {result.error ? (
-        <p id={`${id}-error`} className="field-error" role="alert">
+        <p id={`${id}-error`} className={"field-error text-[#b42318] text-[0.82rem]"} role="alert">
           {result.error}
           {result.line ? ` (dòng ${result.line}, cột ${result.column})` : ""}
         </p>

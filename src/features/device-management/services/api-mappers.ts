@@ -36,7 +36,13 @@ export const mapActor = (raw: unknown): Actor => {
 };
 export const mapObjectType = (raw: unknown): ObjectType => {
   const value = record(raw);
-  return { id: string(value.id), code: string(value.code), name: string(value.name) };
+  const rawAttrs = value.default_attrs ?? value.defaultAttrs;
+  return {
+    id: string(value.id),
+    code: string(value.code),
+    name: string(value.name),
+    defaultAttrs: rawAttrs ? json(rawAttrs) : null,
+  };
 };
 export const mapFeature = (raw: unknown): Feature => {
   const value = record(raw);

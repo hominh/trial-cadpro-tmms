@@ -17,8 +17,13 @@ export function EnforcementApprovalPage() {
     });
   }, [setContext, setRequests]);
   return (
-    <main className="devices-page">
-      <Link className="primary-link" href="/devices">
+    <main className={"devices-page max-w-[1440px] m-[0_auto] p-[2rem]"}>
+      <Link
+        className={
+          "primary-link min-h-[44px] inline-flex items-center justify-center rounded-[0.5rem] [border:1px_solid_transparent] p-[0.65rem_1rem] no-underline cursor-pointer w-fit text-white [background:#10211d]"
+        }
+        href="/devices"
+      >
         ← Quản lý thiết bị
       </Link>
       <EnforcementApprovalQueue />

@@ -17,10 +17,13 @@ export function PolygonCoordinateTable({
   };
   const remove = (index: number) => onChange(vertices.filter((_, item) => item !== index));
   return (
-    <div className="coordinate-table">
+    <div className={"coordinate-table grid gap-[0.4rem]"}>
       <h4>Tọa độ vùng phạt</h4>
       {vertices.map((point, index) => (
-        <div className="coordinate-row" key={`${index}-${point[0]}-${point[1]}`}>
+        <div
+          className={"coordinate-row grid grid-cols-[1fr_1fr_auto] gap-[0.4rem]"}
+          key={`${index}-${point[0]}-${point[1]}`}
+        >
           <Input
             aria-label={`Kinh độ đỉnh ${index + 1}`}
             type="number"

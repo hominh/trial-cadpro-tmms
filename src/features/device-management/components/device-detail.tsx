@@ -21,8 +21,18 @@ export function DeviceDetail({ device }: { readonly device: DeviceRecord }) {
       void listPresets(device.id).then((result) => setPresets(result.items));
   }, [device.id, device.deviceType.ptzConstraints, setFeatures, setHistory, setPresets]);
   return (
-    <aside className="device-detail">
-      <p className="eyebrow">{device.deviceType.name}</p>
+    <aside
+      className={
+        "device-detail sticky top-[1rem] [border:1px_solid_#d6dad3] rounded-[0.8rem] [background:rgba(255,_255,_252,_0.94)] p-[1.15rem] [@media(max-width:940px)]:[&&&]:static"
+      }
+    >
+      <p
+        className={
+          "eyebrow [font:700_0.75rem/1_ui-monospace,_monospace] tracking-[0.2em] text-[#0b6b53]"
+        }
+      >
+        {device.deviceType.name}
+      </p>
       <h2>{device.name}</h2>
       <p>
         {device.code} · {device.status}

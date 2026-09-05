@@ -28,6 +28,12 @@ specify -> clarify (khi cần) -> plan -> tasks -> implement -> analyze -> pull 
 
 Không thêm source feature trực tiếp vào `main` và không bỏ qua Constitution Check.
 
+## Styling
+
+Mọi UI mới dùng Tailwind CSS utility classes và shadcn/ui. Không thêm CSS Module, stylesheet riêng,
+inline `style` hoặc CSS-in-JS. Chỉ override bắt buộc của thư viện bên thứ ba (ví dụ Leaflet) được đặt
+trong `src/app/globals.css`, kèm comment nêu thư viện và lý do Tailwind không biểu đạt được rule đó.
+
 ## Kiểm tra cục bộ
 
 Yêu cầu Node.js 22 (`.nvmrc`). Sao chép `.env.example` thành `.env.local`, sau đó:

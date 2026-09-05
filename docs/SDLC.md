@@ -36,6 +36,8 @@ Một feature sẵn sàng triển khai khi:
 - `spec.md`, `plan.md`, `tasks.md` tồn tại và thống nhất;
 - acceptance scenarios và success criteria đo được;
 - API, shadcn/ui primitives và ownership trong `src/features/<feature>/` đã rõ;
+- UI mới có kế hoạch styling bằng Tailwind utilities; mọi ngoại lệ override thư viện bên thứ ba được
+  ghi rõ trong `src/app/globals.css` cùng lý do;
 - local/UI state và polling/server state đã được phân loại thành store riêng;
 - realtime/geo có viewport contract, polling cadence, AbortController lifecycle và mục tiêu 2.000+
   thiết bị;
@@ -45,6 +47,8 @@ Một feature sẵn sàng triển khai khi:
 
 - Tất cả acceptance scenarios trong scope đạt yêu cầu.
 - Không có direct `fetch`, Axios instance riêng, TanStack Query hoặc UI library ngoài shadcn/ui.
+- Không có CSS Module, custom stylesheet, inline style hoặc CSS-in-JS mới; override thư viện bên thứ
+  ba chỉ nằm trong `src/app/globals.css` và có comment giải thích.
 - TypeScript strict typecheck, lint, test liên quan và production build đều thành công.
 - Polling hủy request cũ và dừng khi dispose; stale response không ghi đè dữ liệu mới.
 - Spec/plan/tasks và tài liệu vận hành phản ánh đúng implementation.

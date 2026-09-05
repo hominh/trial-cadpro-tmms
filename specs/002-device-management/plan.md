@@ -47,6 +47,11 @@ vertices trong MVP
 
 ## Constitution Check
 
+Styling amendment (2026-09-05, constitution 1.1.0): use Tailwind utility classes for the catalog,
+forms, JSON editors, dialogs and preset UI. Load mandatory Leaflet vendor CSS centrally through
+`src/app/globals.css`; retain exact dimensions and breakpoints. See
+[styling migration](../../docs/styling-migration.md) for scope and validation.
+
 *GATE: PASS before Phase 0; PASS again after Phase 1 design.*
 
 - **Strict TypeScript — PASS**: DTO, entity, mutation, problem và geometry đều có type cụ thể; không

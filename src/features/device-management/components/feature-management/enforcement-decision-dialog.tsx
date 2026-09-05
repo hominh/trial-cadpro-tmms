@@ -27,14 +27,18 @@ export function EnforcementDecisionDialog({
     onClose();
   };
   return (
-    <div className="inline-dialog">
+    <div
+      className={
+        "inline-dialog grid gap-[0.65rem] mt-[0.8rem] [border:1px_solid_#e5c891] rounded-[0.6rem] [background:#fffbeb] p-[0.8rem]"
+      }
+    >
       <h3>Quyết định yêu cầu</h3>
       <Input
         value={note}
         onChange={(event) => setNote(event.target.value)}
         placeholder="Ghi chú (tùy chọn)"
       />
-      <div className="inline-actions">
+      <div className={"inline-actions flex flex-wrap gap-[0.6rem] items-end"}>
         <Button variant="outline" onClick={() => void decide("reject")}>
           Từ chối
         </Button>

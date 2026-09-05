@@ -51,9 +51,13 @@ export function PresetForm({ deviceId }: { readonly deviceId: string }) {
     (set: (value: number | null) => void) => (event: React.ChangeEvent<HTMLInputElement>) =>
       set(event.target.value === "" ? null : Number(event.target.value));
   return (
-    <form className="form-grid" onSubmit={submit}>
+    <form className={"form-grid grid gap-[0.9rem] [&_h2]:m-0 [&_h3]:m-0"} onSubmit={submit}>
       <h3>Hiệu chỉnh preset</h3>
-      <div className="two-columns">
+      <div
+        className={
+          "two-columns grid gap-3 grid-cols-2 [@media(max-width:940px)]:[&&&]:grid-cols-[1fr]"
+        }
+      >
         <div>
           <Label htmlFor="preset-no">Preset number</Label>
           <Input
@@ -75,7 +79,11 @@ export function PresetForm({ deviceId }: { readonly deviceId: string }) {
           />
         </div>
       </div>
-      <div className="three-columns">
+      <div
+        className={
+          "three-columns grid gap-3 grid-cols-3 [@media(max-width:940px)]:[&&&]:grid-cols-[1fr]"
+        }
+      >
         <div>
           <Label htmlFor="preset-pan">Pan</Label>
           <Input id="preset-pan" type="number" value={pan ?? ""} onChange={numeric(setPan)} />
@@ -89,7 +97,11 @@ export function PresetForm({ deviceId }: { readonly deviceId: string }) {
           <Input id="preset-zoom" type="number" value={zoom ?? ""} onChange={numeric(setZoom)} />
         </div>
       </div>
-      <div className="two-columns">
+      <div
+        className={
+          "two-columns grid gap-3 grid-cols-2 [@media(max-width:940px)]:[&&&]:grid-cols-[1fr]"
+        }
+      >
         <div>
           <Label htmlFor="preset-lane">Làn</Label>
           <Input
@@ -113,7 +125,7 @@ export function PresetForm({ deviceId }: { readonly deviceId: string }) {
       />
       <PolygonCoordinateTable vertices={vertices} onChange={setVertices} />
       {error ? (
-        <p role="alert" className="field-error">
+        <p role="alert" className={"field-error text-[#b42318] text-[0.82rem]"}>
           {error}
         </p>
       ) : null}

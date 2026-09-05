@@ -31,9 +31,14 @@ export function DeviceFeatureList({ deviceId }: { readonly deviceId: string }) {
   return (
     <section>
       <h3>Feature khả dụng</h3>
-      <div className="feature-list">
+      <div className={"feature-list grid gap-[0.65rem] p-0 list-none"}>
         {features.map((item) => (
-          <div key={item.feature.code} className="feature-row">
+          <div
+            key={item.feature.code}
+            className={
+              "feature-row flex items-center justify-between gap-[0.8rem] [border:1px_solid_#d6dad3] rounded-[0.6rem] p-[0.7rem] [&_small]:block [&_small]:text-[#5b6b65]"
+            }
+          >
             <div>
               <strong>{item.feature.name}</strong>
               <small>{item.feature.code}</small>

@@ -55,6 +55,8 @@ export interface ObjectType {
   readonly id: string;
   readonly code: string;
   readonly name: string;
+  /** Optional attrs template from API. Frontend falls back to hardcoded template when absent. */
+  readonly defaultAttrs?: JsonObject | null;
 }
 export interface NumericConstraint {
   readonly min: number;

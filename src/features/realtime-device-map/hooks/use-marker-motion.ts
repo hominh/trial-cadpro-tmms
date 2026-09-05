@@ -40,9 +40,12 @@ export function useMarkerMotion() {
       const progress = track.durationMs <= 0 ? 1 : (now - track.startedAt) / track.durationMs;
       const point = interpolatePoint(track.from, track.to, progress);
       track.marker.setLatLng(point);
-      const inner = track.marker.getElement()?.querySelector<HTMLElement>("[data-marker-heading]");
+      const inner = track.marker.getElement()?.querySelector<SVGGElement>("[data-marker-heading]");
       if (inner)
-        inner.style.transform = `rotate(${interpolateAngle(track.fromCourse, track.toCourse, progress)}deg)`;
+        inner.setAttribute(
+          "transform",
+          `rotate(${interpolateAngle(track.fromCourse, track.toCourse, progress)} 19 19)`
+        );
       if (progress >= 1) tracks.current.delete(id);
     }
     frame.current = tracks.current.size ? requestAnimationFrame(tick) : null;

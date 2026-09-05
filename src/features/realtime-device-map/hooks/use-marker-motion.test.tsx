@@ -19,10 +19,14 @@ describe("useMarkerMotion", () => {
   });
   it("retargets through one shared linear scheduler", () => {
     const setLatLng = vi.fn();
+    const host = document.createElement("div");
+    const heading = document.createElementNS("http://www.w3.org/2000/svg", "g");
+    heading.setAttribute("data-marker-heading", "");
+    host.append(heading);
     const marker = {
       getLatLng: () => ({ lat: 10, lng: 106 }),
       setLatLng,
-      getElement: () => null,
+      getElement: () => host,
     } as unknown as Marker;
     const { result, unmount } = renderHook(() => useMarkerMotion());
     act(() =>
@@ -40,6 +44,8 @@ describe("useMarkerMotion", () => {
     expect(setLatLng).not.toHaveBeenCalled();
     act(() => vi.runAllTimers());
     expect(setLatLng).toHaveBeenCalledTimes(2);
+    expect(heading.getAttribute("transform")).toBe("rotate(90 19 19)");
+    expect(heading.hasAttribute("style")).toBe(false);
     unmount();
   });
 });

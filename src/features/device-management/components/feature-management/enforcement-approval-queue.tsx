@@ -18,7 +18,12 @@ export function EnforcementApprovalQueue() {
         <p>Không có yêu cầu chờ duyệt.</p>
       ) : (
         requests.map((request) => (
-          <article className="approval-card" key={request.id}>
+          <article
+            className={
+              "approval-card flex items-center justify-between gap-[0.8rem] [border:1px_solid_#d6dad3] rounded-[0.6rem] p-[0.7rem] grid justify-start m-[0.6rem_0] [&_p]:m-0"
+            }
+            key={request.id}
+          >
             <strong>{request.feature.name}</strong>
             <p>{request.reason}</p>
             <small>Người gửi: {request.requestedBy.displayName}</small>

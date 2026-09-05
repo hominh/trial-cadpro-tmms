@@ -44,7 +44,13 @@ export function DeviceTable() {
               <TableCell>{device.object.name}</TableCell>
               <TableCell>{device.deviceType.name}</TableCell>
               <TableCell>
-                <span className="badge">{device.status}</span>
+                <span
+                  className={
+                    "badge inline-flex items-center rounded-[999px] p-[0.2rem_0.5rem] [background:#e9ece8] text-[0.72rem] font-bold"
+                  }
+                >
+                  {device.status}
+                </span>
               </TableCell>
               <TableCell>
                 {device.lastSeenAt ? new Date(device.lastSeenAt).toLocaleString("vi-VN") : "—"}

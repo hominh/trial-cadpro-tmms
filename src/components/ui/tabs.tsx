@@ -24,7 +24,10 @@ export function Tabs({
 }
 export function TabsList({ children }: { readonly children: React.ReactNode }) {
   return (
-    <div className="tabs-list" role="tablist">
+    <div
+      className={"tabs-list flex gap-[0.3rem] overflow-x-auto [border-bottom:1px_solid_#d6dad3]"}
+      role="tablist"
+    >
       {children}
     </div>
   );
@@ -43,7 +46,11 @@ export function TabsTrigger({
       type="button"
       role="tab"
       aria-selected={ctx.value === value}
-      className={cn("tabs-trigger", ctx.value === value && "tabs-trigger-active")}
+      className={cn(
+        "tabs-trigger border-0 [border-bottom:2px_solid_transparent] bg-transparent p-[0.6rem_0.45rem] text-[#5b6b65] cursor-pointer",
+        ctx.value === value &&
+          "tabs-trigger-active [&&]:[border-color:#0b6b53] [&&]:text-[#10211d] [&&]:font-bold"
+      )}
       onClick={() => ctx.setValue(value)}
     >
       {children}
@@ -60,7 +67,7 @@ export function TabsContent({
   const ctx = React.useContext(TabsContext);
   if (!ctx) throw new Error("TabsContent must be inside Tabs");
   return ctx.value === value ? (
-    <div role="tabpanel" className="tabs-content">
+    <div role="tabpanel" className={"tabs-content pt-[1rem]"}>
       {children}
     </div>
   ) : null;

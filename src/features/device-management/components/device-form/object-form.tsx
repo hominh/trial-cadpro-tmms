@@ -1,15 +1,17 @@
 "use client";
 
-import { useState } from "react";
+import { useMemo, useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { JsonObjectEditor } from "./json-object-editor";
+import { TemplateJsonEditor } from "./template-json-editor";
 import { ObjectPointPickerLoader } from "./object-point-picker-loader";
 import { createObject } from "../../services/device-catalog-api";
 import { parseJsonObject } from "../../utils/json-config";
+import { getAttrTemplate, coerceAttrsToTemplate } from "../../utils/object-attr-templates";
 import { useDeviceCatalogStore } from "../../stores/device-catalog-store";
-import type { GeoJsonPoint } from "../../types/device-management.types";
+import type { GeoJsonPoint, JsonObject } from "../../types/device-management.types";
 
 export function ObjectForm({ onCreated }: { readonly onCreated: () => void }) {
   const catalogs = useDeviceCatalogStore((state) => state.catalogs);
@@ -19,19 +21,32 @@ export function ObjectForm({ onCreated }: { readonly onCreated: () => void }) {
   const [name, setName] = useState("");
   const [typeId, setTypeId] = useState("");
   const [status, setStatus] = useState("active");
-  const [attrs, setAttrs] = useState("{}");
+  const [attrsJson, setAttrsJson] = useState("{}");
+  const [attrsObj, setAttrsObj] = useState<JsonObject | null>(null);
   const [point, setPoint] = useState<GeoJsonPoint>({ type: "Point", coordinates: [106.7, 10.77] });
   const [error, setError] = useState<string | null>(null);
+
+  const template = useMemo(
+    () => getAttrTemplate(typeId, catalogs?.objectTypes ?? null),
+    [typeId, catalogs?.objectTypes]
+  );
+
   const submit = async (event: React.FormEvent) => {
     event.preventDefault();
-    const parsed = parseJsonObject(attrs);
-    if (!parsed.value) {
-      setError("Thuộc tính mở rộng phải là JSON object hợp lệ.");
-      return;
-    }
     if (!typeId) {
       setError("Chọn object type.");
       return;
+    }
+    let finalAttrs: JsonObject;
+    if (template) {
+      finalAttrs = coerceAttrsToTemplate(attrsObj, template);
+    } else {
+      const parsed = parseJsonObject(attrsJson);
+      if (!parsed.value) {
+        setError("Thuộc tính mở rộng phải là JSON object hợp lệ.");
+        return;
+      }
+      finalAttrs = parsed.value;
     }
     try {
       const result = await createObject({
@@ -40,7 +55,7 @@ export function ObjectForm({ onCreated }: { readonly onCreated: () => void }) {
         objectTypeId: typeId,
         location: point,
         status,
-        attrs: parsed.value,
+        attrs: finalAttrs,
       });
       setObjects([result.item, ...objects]);
       onCreated();
@@ -49,9 +64,13 @@ export function ObjectForm({ onCreated }: { readonly onCreated: () => void }) {
     }
   };
   return (
-    <form className="form-grid" onSubmit={submit}>
+    <form className={"form-grid grid gap-[0.9rem] [&_h2]:m-0 [&_h3]:m-0"} onSubmit={submit}>
       <h2>Tạo vị trí lắp đặt</h2>
-      <div className="two-columns">
+      <div
+        className={
+          "two-columns grid gap-3 grid-cols-2 [@media(max-width:940px)]:[&&&]:grid-cols-[1fr]"
+        }
+      >
         <div>
           <Label htmlFor="object-code">Mã object</Label>
           <Input
@@ -71,12 +90,18 @@ export function ObjectForm({ onCreated }: { readonly onCreated: () => void }) {
           />
         </div>
       </div>
-      <div className="two-columns">
+      <div
+        className={
+          "two-columns grid gap-3 grid-cols-2 [@media(max-width:940px)]:[&&&]:grid-cols-[1fr]"
+        }
+      >
         <div>
           <Label htmlFor="object-type">Object type</Label>
           <select
             id="object-type"
-            className="input"
+            className={
+              "input min-h-[44px] [border:1px_solid_#d6dad3] rounded-[0.5rem] bg-white text-[#10211d] p-[0.6rem_0.75rem] outline-none [&:focus]:[border-color:#0b6b53] [&:focus]:[box-shadow:0_0_0_3px_rgba(11,_107,_83,_0.15)]"
+            }
             required
             value={typeId}
             onChange={(event) => setTypeId(event.target.value)}
@@ -93,7 +118,9 @@ export function ObjectForm({ onCreated }: { readonly onCreated: () => void }) {
           <Label htmlFor="object-status">Trạng thái</Label>
           <select
             id="object-status"
-            className="input"
+            className={
+              "input min-h-[44px] [border:1px_solid_#d6dad3] rounded-[0.5rem] bg-white text-[#10211d] p-[0.6rem_0.75rem] outline-none [&:focus]:[border-color:#0b6b53] [&:focus]:[box-shadow:0_0_0_3px_rgba(11,_107,_83,_0.15)]"
+            }
             value={status}
             onChange={(event) => setStatus(event.target.value)}
           >
@@ -106,14 +133,24 @@ export function ObjectForm({ onCreated }: { readonly onCreated: () => void }) {
         </div>
       </div>
       <ObjectPointPickerLoader value={point} onChange={setPoint} />
-      <JsonObjectEditor
-        id="object-attrs"
-        label="Thuộc tính mở rộng (JSON)"
-        value={attrs}
-        onChange={setAttrs}
-      />
+      {template ? (
+        <TemplateJsonEditor
+          id="object-attrs"
+          label="Thuộc tính mở rộng (JSON)"
+          typeId={typeId}
+          value={attrsObj}
+          onChange={setAttrsObj}
+        />
+      ) : (
+        <JsonObjectEditor
+          id="object-attrs"
+          label="Thuộc tính mở rộng (JSON)"
+          value={attrsJson}
+          onChange={setAttrsJson}
+        />
+      )}
       {error ? (
-        <p className="field-error" role="alert">
+        <p className={"field-error text-[#b42318] text-[0.82rem]"} role="alert">
           {error}
         </p>
       ) : null}

@@ -118,7 +118,12 @@ export function DeviceMarkerLayer({ devices }: { devices: readonly DeviceState[]
         if (!open) setCandidates([]);
       }}
     >
-      <PopoverContent className="collocated-picker" aria-label="Chọn thiết bị cùng vị trí">
+      <PopoverContent
+        className={
+          "collocated-picker grid gap-[0.35rem] min-w-[230px] [&_.button]:justify-between [&_.button]:text-left [&_small]:block [&_small]:text-[#5b6b65]"
+        }
+        aria-label="Chọn thiết bị cùng vị trí"
+      >
         <strong>{candidates.length} thiết bị tại vị trí này</strong>
         {candidates.map((device) => (
           <Button

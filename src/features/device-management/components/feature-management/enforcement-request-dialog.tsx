@@ -48,7 +48,12 @@ export function EnforcementRequestDialog({
     }
   };
   return (
-    <form className="inline-dialog" onSubmit={submit}>
+    <form
+      className={
+        "inline-dialog grid gap-[0.65rem] mt-[0.8rem] [border:1px_solid_#e5c891] rounded-[0.6rem] [background:#fffbeb] p-[0.8rem]"
+      }
+      onSubmit={submit}
+    >
       <h4>Yêu cầu bật {feature.feature.name}</h4>
       <Label htmlFor="approval-reason">Lý do</Label>
       <Input
@@ -58,11 +63,11 @@ export function EnforcementRequestDialog({
         required
       />
       {error ? (
-        <p role="alert" className="field-error">
+        <p role="alert" className={"field-error text-[#b42318] text-[0.82rem]"}>
           {error}
         </p>
       ) : null}
-      <div className="inline-actions">
+      <div className={"inline-actions flex flex-wrap gap-[0.6rem] items-end"}>
         <Button type="button" variant="outline" onClick={onClose}>
           Hủy
         </Button>

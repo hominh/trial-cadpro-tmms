@@ -32,8 +32,17 @@ export function DeviceMapFilters() {
   }, [query, setQuery]);
   const selectedType = [...filters.deviceTypes][0] ?? "all";
   return (
-    <div className="map-filters" aria-label="Bộ lọc thiết bị">
-      <label className="search-field">
+    <div
+      className={
+        "map-filters flex items-center gap-[0.55rem] [@media(max-width:760px)]:[&&&]:overflow-x-auto [@media(max-width:760px)]:[&&&]:pb-[0.1rem]"
+      }
+      aria-label="Bộ lọc thiết bị"
+    >
+      <label
+        className={
+          "search-field relative flex items-center [&_>_svg]:absolute [&_>_svg]:left-[0.75rem] [&_>_svg]:z-[1] [&_>_svg]:text-[#5b6b65] [&_.input]:w-[min(280px,_28vw)] [&_.input]:pl-[2.2rem] [@media(max-width:760px)]:[&_.input]:w-[240px]"
+        }
+      >
         <Search size={16} aria-hidden="true" />
         <span className="sr-only">Tìm theo mã hoặc tên thiết bị</span>
         <Input

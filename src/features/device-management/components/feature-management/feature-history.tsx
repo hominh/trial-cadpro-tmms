@@ -7,7 +7,7 @@ export function FeatureHistory() {
       {history.length === 0 ? (
         <p>Chưa có lịch sử.</p>
       ) : (
-        <ol className="history-list">
+        <ol className={"history-list grid gap-[0.65rem] p-0 list-none"}>
           {history.map((item) => (
             <li key={item.id}>
               <strong>{item.eventType}</strong> · {item.feature.name}

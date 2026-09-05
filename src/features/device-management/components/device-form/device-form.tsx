@@ -45,9 +45,13 @@ export function DeviceForm({ onCreated }: { readonly onCreated: () => void }) {
     }
   };
   return (
-    <form className="form-grid" onSubmit={submit}>
+    <form className={"form-grid grid gap-[0.9rem] [&_h2]:m-0 [&_h3]:m-0"} onSubmit={submit}>
       <h2>Tạo thiết bị</h2>
-      <div className="two-columns">
+      <div
+        className={
+          "two-columns grid gap-3 grid-cols-2 [@media(max-width:940px)]:[&&&]:grid-cols-[1fr]"
+        }
+      >
         <div>
           <Label htmlFor="device-code">Mã device</Label>
           <Input
@@ -67,7 +71,11 @@ export function DeviceForm({ onCreated }: { readonly onCreated: () => void }) {
           />
         </div>
       </div>
-      <div className="two-columns">
+      <div
+        className={
+          "two-columns grid gap-3 grid-cols-2 [@media(max-width:940px)]:[&&&]:grid-cols-[1fr]"
+        }
+      >
         <div>
           <Label htmlFor="device-serial">Serial</Label>
           <Input
@@ -80,7 +88,9 @@ export function DeviceForm({ onCreated }: { readonly onCreated: () => void }) {
           <Label htmlFor="device-type-form">Device type</Label>
           <select
             id="device-type-form"
-            className="input"
+            className={
+              "input min-h-[44px] [border:1px_solid_#d6dad3] rounded-[0.5rem] bg-white text-[#10211d] p-[0.6rem_0.75rem] outline-none [&:focus]:[border-color:#0b6b53] [&:focus]:[box-shadow:0_0_0_3px_rgba(11,_107,_83,_0.15)]"
+            }
             required
             value={typeId}
             onChange={(event) => setTypeId(event.target.value)}
@@ -99,7 +109,9 @@ export function DeviceForm({ onCreated }: { readonly onCreated: () => void }) {
         <Label htmlFor="device-status-form">Trạng thái</Label>
         <select
           id="device-status-form"
-          className="input"
+          className={
+            "input min-h-[44px] [border:1px_solid_#d6dad3] rounded-[0.5rem] bg-white text-[#10211d] p-[0.6rem_0.75rem] outline-none [&:focus]:[border-color:#0b6b53] [&:focus]:[box-shadow:0_0_0_3px_rgba(11,_107,_83,_0.15)]"
+          }
           value={status}
           onChange={(event) => setStatus(event.target.value)}
         >
@@ -117,7 +129,7 @@ export function DeviceForm({ onCreated }: { readonly onCreated: () => void }) {
         onChange={setConfig}
       />
       {error ? (
-        <p className="field-error" role="alert">
+        <p className={"field-error text-[#b42318] text-[0.82rem]"} role="alert">
           {error}
         </p>
       ) : null}

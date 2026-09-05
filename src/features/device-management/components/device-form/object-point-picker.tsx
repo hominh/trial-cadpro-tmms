@@ -26,12 +26,20 @@ export function ObjectPointPicker({
     onChange({ type: "Point", coordinates });
   };
   return (
-    <fieldset className="point-picker">
+    <fieldset
+      className={
+        "point-picker grid gap-[0.6rem] [border:1px_solid_#d6dad3] rounded-[0.6rem] p-[0.8rem] [&_legend]:p-[0_0.3rem] [&_legend]:font-bold"
+      }
+    >
       <legend>Vị trí lắp đặt</legend>
-      <p className="field-hint">
+      <p className={"field-hint m-0 text-[#5b6b65] text-[0.8rem]"}>
         Click trên bản đồ hoặc nhập kinh độ/vĩ độ chính xác bằng bàn phím.
       </p>
-      <div className="point-map">
+      <div
+        className={
+          "point-map h-[260px] overflow-hidden [border:1px_solid_#d6dad3] rounded-[0.6rem] [&_.leaflet-container]:w-full [&_.leaflet-container]:h-full"
+        }
+      >
         <MapContainer
           center={[value.coordinates[1], value.coordinates[0]]}
           zoom={15}
@@ -45,7 +53,11 @@ export function ObjectPointPicker({
           <CircleMarker center={[value.coordinates[1], value.coordinates[0]]} radius={8} />
         </MapContainer>
       </div>
-      <div className="two-columns">
+      <div
+        className={
+          "two-columns grid gap-3 grid-cols-2 [@media(max-width:940px)]:[&&&]:grid-cols-[1fr]"
+        }
+      >
         <div>
           <Label htmlFor="object-lng">Kinh độ</Label>
           <Input
