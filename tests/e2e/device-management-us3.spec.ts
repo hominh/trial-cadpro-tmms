@@ -1,0 +1,2 @@
+import { expect, test } from "@playwright/test";
+test("US3: reveals the preset workflow only for a PTZ device", async ({ page }) => { await page.goto("/devices"); await page.getByRole("button", { name: "Chi tiết" }).nth(1).click(); await expect(page.getByRole("tab", { name: "Preset" })).toBeVisible(); await page.getByRole("tab", { name: "Preset" }).click(); await expect(page.getByRole("heading", { name: "Hiệu chỉnh preset" })).toBeVisible(); });

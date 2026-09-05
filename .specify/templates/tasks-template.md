@@ -67,6 +67,8 @@ Examples of foundational tasks (adjust based on your project):
 - [ ] T004 Confirm TypeScript strict mode and project typecheck command
 - [ ] T005 [P] Extend shared Axios instance behavior in src/helpers/api/ when required
 - [ ] T006 [P] Add required shadcn/ui primitives in src/components/ui/
+- [ ] T006a [P] Confirm new UI uses Tailwind utility classes only; document any unavoidable
+  third-party override in src/app/globals.css with its rationale
 - [ ] T007 Create feature boundary in src/features/[feature]/
 - [ ] T008 [P] Define separate Zustand stores for each required UI or polling domain
 - [ ] T009 Define AbortController lifecycle and viewport request contract for realtime/geo work
@@ -92,7 +94,8 @@ Examples of foundational tasks (adjust based on your project):
 ### Implementation for User Story 1
 
 - [ ] T012 [P] [US1] Define strict feature types in src/features/[feature]/types/
-- [ ] T013 [P] [US1] Build UI from shadcn/ui in src/features/[feature]/components/
+- [ ] T013 [P] [US1] Build UI from shadcn/ui and Tailwind utility classes in
+  src/features/[feature]/components/
 - [ ] T014 [US1] Implement API service through src/helpers/api/ in
   src/features/[feature]/services/ (depends on T012)
 - [ ] T015 [US1] Implement focused Zustand store in src/features/[feature]/stores/ when required
@@ -162,6 +165,7 @@ Examples of foundational tasks (adjust based on your project):
 - [ ] TXXX [P] Additional unit tests (if requested) in tests/unit/
 - [ ] TXXX Security hardening
 - [ ] TXXX Verify no direct fetch, feature-local Axios instance, TanStack Query, or extra UI library
+- [ ] TXXX Verify no CSS Modules, inline styles, CSS-in-JS, or undocumented custom stylesheet rules
 - [ ] TXXX Verify Zustand stores remain separated by domain and lifecycle
 - [ ] TXXX For realtime/geo work, verify viewport bounds, AbortController cancellation, disposal,
   stale-response handling, and the 2,000-device scale target

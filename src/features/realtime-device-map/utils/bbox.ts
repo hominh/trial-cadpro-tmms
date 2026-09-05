@@ -1,4 +1,8 @@
-import type { DeviceMapFilters, NormalizedMapQuery, ViewportBounds } from "../types/device-map.types";
+import type {
+  DeviceMapFilters,
+  NormalizedMapQuery,
+  ViewportBounds,
+} from "../types/device-map.types";
 
 const PRECISION = 5;
 
@@ -10,7 +14,8 @@ export function validateBounds(bounds: ViewportBounds): ViewportBounds {
   if (bounds.west < -180 || bounds.east > 180 || bounds.south < -90 || bounds.north > 90) {
     throw new Error("Viewport bounds are outside CRS84 limits.");
   }
-  if (bounds.west >= bounds.east) throw new Error("Dateline-crossing or empty bounds are unsupported.");
+  if (bounds.west >= bounds.east)
+    throw new Error("Dateline-crossing or empty bounds are unsupported.");
   if (bounds.south >= bounds.north) throw new Error("Viewport south must be below north.");
   return bounds;
 }
@@ -32,17 +37,30 @@ export function serializeBbox(bounds: ViewportBounds): string {
 
 export function normalizeFilters(filters: DeviceMapFilters): DeviceMapFilters {
   return {
-    deviceTypes: new Set([...filters.deviceTypes].map((value) => value.trim()).filter(Boolean).sort()),
+    deviceTypes: new Set(
+      [...filters.deviceTypes]
+        .map((value) => value.trim())
+        .filter(Boolean)
+        .sort()
+    ),
     status: filters.status,
     query: filters.query.trim().slice(0, 100),
   };
 }
 
-export function toNormalizedQuery(bounds: ViewportBounds, filters: DeviceMapFilters): NormalizedMapQuery {
+export function toNormalizedQuery(
+  bounds: ViewportBounds,
+  filters: DeviceMapFilters
+): NormalizedMapQuery {
   const normalizedBounds = normalizeBounds(bounds);
   const normalizedFilters = normalizeFilters(filters);
   return {
-    bbox: [normalizedBounds.west, normalizedBounds.south, normalizedBounds.east, normalizedBounds.north],
+    bbox: [
+      normalizedBounds.west,
+      normalizedBounds.south,
+      normalizedBounds.east,
+      normalizedBounds.north,
+    ],
     deviceTypes: [...normalizedFilters.deviceTypes],
     status: normalizedFilters.status,
     query: normalizedFilters.query || null,

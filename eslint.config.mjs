@@ -3,7 +3,7 @@ import { FlatCompat } from "@eslint/eslintrc";
 const compat = new FlatCompat({ baseDirectory: import.meta.dirname });
 
 const eslintConfig = [
-  { ignores: ["node_modules/**", ".next/**", "next-env.d.ts", "dist/**", "build/**", "coverage/**", "playwright-report/**", "test-results/**"] },
+  { ignores: ["node_modules/**", ".next/**", ".next-*/**", "next-env.d.ts", "dist/**", "build/**", "coverage/**", "playwright-report/**", "test-results/**", "public/mockServiceWorker.js"] },
   ...compat.extends("next/core-web-vitals", "next/typescript"),
 ];
 

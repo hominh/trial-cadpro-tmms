@@ -263,6 +263,13 @@ Then integrate: T043 -> T044
 
 ## Notes
 
+### Styling amendment — 2026-09-05
+
+- [X] T053 Migrate shared UI and realtime map styling to Tailwind utilities; centralize mandatory
+  Leaflet CSS in `src/app/globals.css`, replace marker inline CSS rotation with SVG attributes in
+  `src/features/realtime-device-map/hooks/use-marker-motion.ts`, and verify unit/E2E regressions in
+  `tests/e2e/tailwind-styling.spec.ts`. Evidence: `docs/styling-migration.md`.
+
 - `[P]` never authorizes parallel edits to the same file.
 - `gps_status=V` may update allowed non-position metadata but never canonical position/version.
 - `isStatic` pauses animation and is not a substitute for `mobility`.

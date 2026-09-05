@@ -51,6 +51,11 @@ một viewport; chỉ marker mobile, non-static, visible và có fix hợp lệ 
 
 ## Constitution Check
 
+Styling amendment (2026-09-05, constitution 1.1.0): use Tailwind utility classes throughout the
+map and shared UI; retain vendor Leaflet CSS centrally in `src/app/globals.css` with rationale.
+Marker angle updates use SVG transform attributes with the existing interpolation/scheduler.
+See [styling migration](../../docs/styling-migration.md) for scope and validation.
+
 *GATE: Passed before Phase 0 and re-checked after Phase 1 design.*
 
 - **Strict TypeScript — PASS**: `strict: true` là gate scaffold; contract và store có kiểu tường minh,

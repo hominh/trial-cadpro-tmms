@@ -128,6 +128,14 @@ if (Test-Path -LiteralPath $sourcePath -PathType Container) {
         }
     }
 
+    $managementStorePath = Join-Path $sourcePath 'features/device-management/stores/device-management-ui-store.ts'
+    if (Test-Path -LiteralPath $managementStorePath -PathType Leaf) {
+        $managementStore = Get-Content -LiteralPath $managementStorePath -Raw -Encoding utf8
+        if ($managementStore -match 'devicesById|features:|presets:|AbortController|setInterval') {
+            Add-Failure 'Device-management UI state is mixed with server domain data.'
+        }
+    }
+
     $featuresPath = Join-Path $sourcePath 'features'
     if (Test-Path -LiteralPath $featuresPath -PathType Container) {
         $specsPath = Join-Path $projectRoot 'specs'

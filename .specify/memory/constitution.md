@@ -1,26 +1,21 @@
 <!--
 Sync Impact Report
-- Version change: template (unratified) -> 1.0.0
+- Version change: 1.0.0 -> 1.1.0
 - Modified principles:
-  - Template placeholders -> I. Strict Type Safety and Feature Ownership
-  - Template placeholders -> II. Centralized Axios API Boundary
-  - Template placeholders -> III. shadcn/ui-Only Interface System
-  - Template placeholders -> IV. Domain-Separated Zustand State
-  - Template placeholders -> V. Specification-Driven Delivery
-  - Template placeholders -> VI. Scalable Realtime and Geospatial Data
+  - III. shadcn/ui-Only Interface System -> III. shadcn/ui and Tailwind Interface System
 - Added sections:
-  - Technology and Architecture Constraints
-  - Development Workflow and Quality Gates
-- Removed sections: None; template sections were concretized.
+  - VII. Tailwind-Only Styling
+- Removed sections: None.
 - Templates requiring updates:
   - ✅ updated: .specify/templates/plan-template.md
   - ✅ updated: .specify/templates/spec-template.md
   - ✅ updated: .specify/templates/tasks-template.md
 - Command and runtime guidance review:
-  - ✅ reviewed: .agents/skills/speckit-*/SKILL.md; no stale agent-specific guidance found
-  - ✅ reviewed: no README.md, AGENTS.md, docs/quickstart.md, or equivalent runtime
-    guidance file is present
-- Follow-up TODOs: None
+  - ✅ reviewed: .agents/skills/speckit-*/SKILL.md; generic guidance has no stale
+    agent-specific references.
+  - ✅ updated: README.md and docs/SDLC.md
+- Follow-up TODOs: Existing nonconforming styles MUST receive a migration task before their
+  affected feature is next materially changed.
 -->
 # CadPro TMMS Frontend Constitution
 
@@ -41,7 +36,7 @@ independent Axios instances. Cross-cutting behavior such as base URL configurati
 error normalization, cancellation, and interceptors MUST be implemented at this shared boundary.
 This provides one auditable and consistent network contract.
 
-### III. shadcn/ui-Only Interface System
+### III. shadcn/ui and Tailwind Interface System
 Product UI MUST be composed from shadcn/ui components and project-owned components built on those
 primitives. No other UI component library MAY be introduced. Missing patterns MUST be implemented
 as local, accessible components consistent with shadcn/ui conventions. This prevents competing
@@ -70,10 +65,22 @@ the owning view or subscription is disposed. Plans and specs MUST define polling
 change behavior, stale-response handling, and measurable scale targets whenever this principle
 applies.
 
+### VII. Tailwind-Only Styling
+All product styling MUST use Tailwind CSS utility classes and the Tailwind-compatible styling of
+shadcn/ui. New components MUST NOT introduce CSS Modules, feature-specific or other custom CSS
+files, inline `style` props, or CSS-in-JS. A third-party-library override, such as Leaflet styling,
+is the only exception: it MUST be consolidated in the single global stylesheet, currently
+`src/app/globals.css`, and preceded by a comment naming the library and explaining why utilities
+cannot express the override. Existing nonconforming styles MUST receive a migration task before the
+affected feature is next materially changed. This keeps visual rules discoverable, composable, and
+consistent with the project design system.
+
 ## Technology and Architecture Constraints
 
 - The frontend stack is Next.js with TypeScript strict mode.
 - shadcn/ui is the sole UI component system.
+- Tailwind CSS utility classes are the sole product-styling mechanism; custom CSS is limited to the
+  documented third-party override exception in `src/app/globals.css`.
 - Axios, through the shared API instance, is the sole HTTP data-fetching mechanism.
 - TanStack Query and direct `fetch` usage are prohibited.
 - Zustand is the shared state-management library, with stores separated by domain and lifecycle.
@@ -96,7 +103,8 @@ plan, then explicitly approved before implementation.
 4. Run `tasks`; tasks MUST name exact paths and include all applicable constitution work, including
    shared Axios integration, separated Zustand stores, strict typing, and scalable polling.
 5. Implement only from the approved task list. Reviews MUST reject direct `fetch`, extra UI
-   libraries, TanStack Query, monolithic stores, misplaced feature code, or uncancelled polling.
+   libraries, TanStack Query, monolithic stores, misplaced feature code, uncancelled polling, CSS
+   Modules, inline styling, CSS-in-JS, or undocumented custom stylesheet rules.
 6. Before merge, run the repository's typecheck, lint, and relevant tests. Realtime/geospatial
    work MUST also verify viewport-bounded requests, cancellation, disposal, and the declared scale
    target.
@@ -117,4 +125,4 @@ implementation or merge. Approved exceptions MUST be temporary, scoped, recorded
 Tracking, and reviewed again before release. The constitution MUST be reviewed whenever the core
 frontend stack or device-scale requirements change.
 
-**Version**: 1.0.0 | **Ratified**: 2026-09-04 | **Last Amended**: 2026-09-04
+**Version**: 1.1.0 | **Ratified**: 2026-09-04 | **Last Amended**: 2026-09-05

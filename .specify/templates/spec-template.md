@@ -104,6 +104,9 @@
 - **API Interactions**: [List required endpoints, or state N/A; all HTTP access will use the shared
   Axios instance]
 - **UI Composition**: [List expected shadcn/ui primitives and any project-owned composition needed]
+- **Styling**: [State the Tailwind utility-class approach. If a third-party style override is needed,
+  name the library, explain why Tailwind cannot express it, and require a commented rule in
+  `src/app/globals.css`; otherwise state N/A]
 - **State Classification**: [Identify local state, UI-domain Zustand state, and server-polling
   Zustand state separately, or state N/A for each]
 - **Realtime/Geo Scale**: [If applicable, define behavior for 2,000+ devices, viewport bounds,

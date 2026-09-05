@@ -87,13 +87,7 @@ export interface ViewportTooDenseProblem extends ProblemResponse {
 }
 
 export type DeviceMapErrorKind =
-  | "invalidQuery"
-  | "tooDense"
-  | "rateLimited"
-  | "network"
-  | "server"
-  | "contract"
-  | "cancelled";
+  "invalidQuery" | "tooDense" | "rateLimited" | "network" | "server" | "contract" | "cancelled";
 
 export interface DeviceMapError {
   readonly kind: DeviceMapErrorKind;

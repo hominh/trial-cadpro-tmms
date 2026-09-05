@@ -28,6 +28,12 @@ specify -> clarify (khi cần) -> plan -> tasks -> implement -> analyze -> pull 
 
 Không thêm source feature trực tiếp vào `main` và không bỏ qua Constitution Check.
 
+## Styling
+
+Mọi UI mới dùng Tailwind CSS utility classes và shadcn/ui. Không thêm CSS Module, stylesheet riêng,
+inline `style` hoặc CSS-in-JS. Chỉ override bắt buộc của thư viện bên thứ ba (ví dụ Leaflet) được đặt
+trong `src/app/globals.css`, kèm comment nêu thư viện và lý do Tailwind không biểu đạt được rule đó.
+
 ## Kiểm tra cục bộ
 
 Yêu cầu Node.js 22 (`.nvmrc`). Sao chép `.env.example` thành `.env.local`, sau đó:
@@ -66,3 +72,12 @@ Trên PowerShell 7/macOS/Linux, dùng `pwsh -File scripts/validate-sdlc.ps1`.
 Nếu API trả `422 VIEWPORT_TOO_DENSE`, giao diện giữ nguyên tính nguyên tử của snapshot và yêu cầu zoom
 in hoặc lọc; không render dữ liệu truncate. Provider suite dùng `PROVIDER_CONTRACT_BASE_URL` và chỉ
 đóng gate khi backend thật xác nhận ETag đổi lúc thiết bị tự chuyển offline sau 30 giây.
+
+## Device management
+
+Mở `/devices` để quản lý object/device, feature audit, enforcement approval và preset PTZ. Local mock
+được MSW intercept khi chạy development (hoặc Playwright tại `127.0.0.1`); mọi request vẫn đi qua shared
+Axios client. Contract chuẩn là [Device Management OpenAPI](specs/002-device-management/contracts/device-management.openapi.yaml).
+
+Provider contract, transaction audit và approval evidence vẫn là release gate với backend thật; xem
+[provider integration checklist](specs/002-device-management/checklists/provider-integration.md).

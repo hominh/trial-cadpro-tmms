@@ -8,7 +8,11 @@ describe("motion math", () => {
     expect(result.lat).toBeCloseTo(10.775);
     expect(result.lng).toBeCloseTo(106.71);
   });
-  it("uses exact fix elapsed time", () => expect(createMotionPlan(a, { lat: 10.7701, lng: 106.7001 }, 1000, 6000)).toMatchObject({ durationMs: 5000, snap: false }));
+  it("uses exact fix elapsed time", () =>
+    expect(createMotionPlan(a, { lat: 10.7701, lng: 106.7001 }, 1000, 6000)).toMatchObject({
+      durationMs: 5000,
+      snap: false,
+    }));
   it("snaps only above 120 km/h or eight seconds", () => {
     expect(createMotionPlan(a, { lat: 11.77, lng: 107.7 }, 1000, 6000).snap).toBe(true);
     expect(createMotionPlan(a, { lat: 10.7701, lng: 106.7001 }, 1000, 9001).snap).toBe(true);

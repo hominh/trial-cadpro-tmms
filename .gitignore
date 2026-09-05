@@ -5,6 +5,7 @@ build/
 
 # Next.js
 .next/
+.next-*/
 out/
 
 # Tests and tooling
