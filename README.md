@@ -3,8 +3,8 @@
 Frontend quản lý thiết bị và dữ liệu giao thông cho CadPro TMMS, xây dựng bằng Next.js,
 TypeScript strict mode, shadcn/ui, Axios và Zustand.
 
-Repository hiện ở giai đoạn khởi tạo quản trị. Mọi feature phải đi qua Spec Kit trước khi có mã
-ứng dụng:
+Ứng dụng hiện có feature bản đồ thiết bị realtime tại `/map`. Mọi feature tiếp theo vẫn phải đi qua
+Spec Kit trước khi có mã ứng dụng:
 
 ```text
 specify -> clarify (khi cần) -> plan -> tasks -> implement -> analyze -> pull request
@@ -30,11 +30,39 @@ Không thêm source feature trực tiếp vào `main` và không bỏ qua Consti
 
 ## Kiểm tra cục bộ
 
+Yêu cầu Node.js 22 (`.nvmrc`). Sao chép `.env.example` thành `.env.local`, sau đó:
+
+```powershell
+npm ci
+npm run dev
+```
+
+Các biến môi trường bản đồ:
+
+- `NEXT_PUBLIC_API_BASE_URL`: backend Device Map API.
+- `NEXT_PUBLIC_USE_MOCK_API`: đặt `true` để dùng mock API tích hợp tại cùng origin; development mặc định dùng mock khi biến này chưa được khai báo.
+- `NEXT_PUBLIC_MAP_TILE_URL` và `NEXT_PUBLIC_MAP_TILE_ATTRIBUTION`: tile provider và attribution.
+- `NEXT_PUBLIC_DEVICE_MAP_POLL_MS`: chu kỳ polling, chỉ nhận 3.000–5.000 ms.
+
+Với `.env.example` mặc định, mở `http://localhost:3000/map` sẽ hiển thị 120 thiết bị mẫu. Xe bus
+di chuyển theo mỗi chu kỳ poll; camera, cảm biến và tủ điều khiển giữ nguyên vị trí. Để nối backend
+thật, đặt `NEXT_PUBLIC_USE_MOCK_API=false` và cấu hình `NEXT_PUBLIC_API_BASE_URL`.
+
+Backend phải triển khai [OpenAPI contract](specs/001-realtime-device-map/contracts/device-map.openapi.yaml).
+Khi backend chưa sẵn sàng, test dùng MSW handlers trong `tests/mocks/device-map/`; mock không thay thế
+provider-contract gate với backend thật.
+
 ```powershell
 powershell -ExecutionPolicy Bypass -File scripts/validate-sdlc.ps1
+npm run lint
+npm run typecheck
+npm test
+npm run test:e2e
+npm run build
 ```
 
 Trên PowerShell 7/macOS/Linux, dùng `pwsh -File scripts/validate-sdlc.ps1`.
 
-Khi ứng dụng Next.js đã được khởi tạo, CI cũng chạy `npm ci`, lint, typecheck, test (nếu có)
-và build.
+Nếu API trả `422 VIEWPORT_TOO_DENSE`, giao diện giữ nguyên tính nguyên tử của snapshot và yêu cầu zoom
+in hoặc lọc; không render dữ liệu truncate. Provider suite dùng `PROVIDER_CONTRACT_BASE_URL` và chỉ
+đóng gate khi backend thật xác nhận ETag đổi lúc thiết bị tự chuyển offline sau 30 giây.

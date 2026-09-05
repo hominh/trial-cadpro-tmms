@@ -88,3 +88,16 @@ Sau commit đầu tiên, cấu hình ruleset cho `main`:
 - yêu cầu check `SDLC / validate` thành công;
 - chặn force push và deletion;
 - bật secret scanning, push protection và Dependabot alerts nếu gói GitHub hỗ trợ.
+
+## 9. Realtime device map validation
+
+- Feature source thuộc `src/features/realtime-device-map`; route `src/app/map/page.tsx` chỉ compose
+  client loader và không import Leaflet trực tiếp.
+- Mọi request dùng `src/helpers/api/client.ts`, luôn có bbox và AbortSignal. Không dùng `fetch`,
+  TanStack Query hoặc Axios instance riêng.
+- MSW cho phép phát triển khi backend chưa sẵn sàng, nhưng T014 chỉ PASS khi provider test chạy với
+  `PROVIDER_CONTRACT_BASE_URL` thật, gồm ETag/304, offline transition và density 422.
+- Performance baseline dùng fixture seed cố định 5.000 thiết bị (~40% mobile), Chromium headless,
+  profile 4 vCPU/8 GB và `Fast 3G/4G`; warm-up một lần, đo ba lần và báo trung vị.
+- Khi troubleshooting: kiểm tra API base URL/CORS, tile attribution, bbox order longitude/latitude,
+  response `complete=true`, ETag và `poll_after_ms` nằm trong 3.000–5.000 ms.

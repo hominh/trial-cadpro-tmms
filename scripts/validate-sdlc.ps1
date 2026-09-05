@@ -106,6 +106,26 @@ if (Test-Path -LiteralPath $sourcePath -PathType Container) {
         if ($content -match 'axios\.create\s*\(' -and $relative -notlike 'src/helpers/api/*') {
             Add-Failure "Axios instance outside src/helpers/api detected in $relative"
         }
+        if ($relative -notmatch '\.(?:test|spec)\.[cm]?[jt]sx?$' -and
+            $content -match '(?:from\s+|import\s*)["''](?:leaflet|react-leaflet)' -and
+            $content -notmatch '(?m)^\s*["'']use client["''];') {
+            Add-Failure "Leaflet import outside a client boundary detected in $relative"
+        }
+    }
+
+    $deviceStorePath = Join-Path $sourcePath 'features/realtime-device-map/stores/device-state-store.ts'
+    if (Test-Path -LiteralPath $deviceStorePath -PathType Leaf) {
+        $deviceStore = Get-Content -LiteralPath $deviceStorePath -Raw -Encoding utf8
+        if ($deviceStore -match 'selectedDeviceId|viewportBounds|detailPanelOpen|setQuery') {
+            Add-Failure 'Server polling state is mixed with map UI state in device-state-store.ts.'
+        }
+    }
+    $uiStorePath = Join-Path $sourcePath 'features/realtime-device-map/stores/map-ui-store.ts'
+    if (Test-Path -LiteralPath $uiStorePath -PathType Leaf) {
+        $uiStore = Get-Content -LiteralPath $uiStorePath -Raw -Encoding utf8
+        if ($uiStore -match 'devicesById|snapshotId|AbortController|setInterval') {
+            Add-Failure 'Map UI state is mixed with server polling state in map-ui-store.ts.'
+        }
     }
 
     $featuresPath = Join-Path $sourcePath 'features'
